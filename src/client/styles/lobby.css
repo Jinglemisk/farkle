@@ -5,138 +5,137 @@
 @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
 
 .lobby-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--spacing-lg);
-  background-color: rgba(245, 222, 179, 0.9);
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 90%;
   max-width: 800px;
   margin: 0 auto;
-  border: 4px solid #8B4513;
-  position: relative;
-  background-image: linear-gradient(45deg, rgba(139, 69, 19, 0.1) 25%, transparent 25%),
-                    linear-gradient(-45deg, rgba(139, 69, 19, 0.1) 25%, transparent 25%),
-                    linear-gradient(45deg, transparent 75%, rgba(139, 69, 19, 0.1) 75%),
-                    linear-gradient(-45deg, transparent 75%, rgba(139, 69, 19, 0.1) 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-}
-
-.lobby-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url(/assets/images/backgrounds/wood-texture.jpg);
-  opacity: 0.1;
-  border-radius: 4px;
-  pointer-events: none;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .tavern-header {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-md);
-  background-color: rgba(139, 69, 19, 0.1);
-  border-radius: 8px;
-  border: 2px solid #8B4513;
+  margin-bottom: 30px;
 }
 
 .tavern-header h1 {
   font-family: 'MedievalSharp', cursive;
-  font-size: 3rem;
-  color: #8B4513;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-  margin-bottom: var(--spacing-md);
+  color: #5d4037;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .tavern-keeper {
-  font-style: italic;
   font-size: 1.2rem;
-  color: #A52A2A;
-  margin-bottom: var(--spacing-sm);
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 15px;
+  font-style: italic;
 }
 
 .tavern-description {
-  font-size: 1.1rem;
-  color: #4B3621;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1.6;
 }
 
+/* Error message */
+.error-message {
+  padding: 15px;
+  margin: 20px auto;
+  background-color: #ffebee;
+  border: 1px solid #ef9a9a;
+  border-radius: 5px;
+  color: #c62828;
+  text-align: center;
+  max-width: 80%;
+}
+
+/* Join form */
 .join-form {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: var(--spacing-lg);
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: var(--spacing-lg);
+  margin: 20px 0;
+  padding: 20px;
+  background-color: rgba(205, 179, 139, 0.3);
   border-radius: 8px;
-  border: 2px solid #CD853F;
+  border: 2px solid #8d6e63;
 }
 
 .form-group {
-  margin-bottom: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: var(--spacing-sm);
-  color: #4B3621;
-  font-weight: bold;
+  font-family: 'MedievalSharp', cursive;
+  color: #5d4037;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
 }
 
-.join-form input {
-  width: 100%;
-  padding: var(--spacing-md);
-  font-size: 1.1rem;
-  border: 2px solid #CD853F;
-  border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.9);
+.form-group input {
+  padding: 10px;
+  border: 1px solid #a1887f;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: #fff9c4;
 }
 
 .join-button {
-  padding: var(--spacing-md);
-  font-size: 1.2rem;
-  background-color: #8B4513;
-  color: #F5F5DC;
+  padding: 12px 24px;
+  font-family: 'MedievalSharp', cursive;
+  font-size: 16px;
+  background-color: #8d6e63;
+  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease;
+  width: 100%;
 }
 
-.join-button:hover {
-  background-color: #A52A2A;
-  transform: translateY(-2px);
+.join-button:hover:not(:disabled) {
+  background-color: #6d4c41;
 }
 
+.join-button:disabled {
+  background-color: #d7ccc8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Welcome message */
 .welcome-message {
   text-align: center;
-  padding: var(--spacing-md);
-  background-color: rgba(205, 133, 63, 0.2);
-  border-radius: 8px;
-  margin-bottom: var(--spacing-lg);
+  padding: 15px;
+  margin: 20px 0;
+  background-color: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 5px;
+  color: #2e7d32;
 }
 
+/* Player list */
 .player-list {
-  width: 100%;
-  margin-bottom: var(--spacing-lg);
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: var(--spacing-lg);
+  margin: 30px 0;
+  padding: 20px;
+  background-color: rgba(205, 179, 139, 0.3);
   border-radius: 8px;
-  border: 2px solid #CD853F;
 }
 
 .player-list h2 {
-  text-align: center;
-  color: #8B4513;
-  margin-bottom: var(--spacing-md);
   font-family: 'MedievalSharp', cursive;
+  color: #5d4037;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.no-players {
+  text-align: center;
+  color: #8d6e63;
+  font-style: italic;
 }
 
 .player-list ul {
@@ -145,88 +144,116 @@
 }
 
 .player-list li {
-  padding: var(--spacing-sm) var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
-  background-color: rgba(255, 255, 255, 0.6);
-  border-radius: 4px;
-  border: 1px solid #CD853F;
-  font-size: 1.1rem;
+  padding: 10px;
+  margin-bottom: 8px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  color: #5d4037;
+  display: flex;
+  align-items: center;
 }
 
+.player-list li::before {
+  content: "👤";
+  margin-right: 10px;
+}
+
+.current-player {
+  background-color: #e8f5e9 !important;
+  border-left: 4px solid #4caf50;
+  font-weight: bold;
+}
+
+/* Game options */
 .game-options {
-  width: 100%;
-  max-width: 600px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: var(--spacing-lg);
+  margin: 30px 0;
+  padding: 20px;
+  background-color: rgba(205, 179, 139, 0.3);
   border-radius: 8px;
-  border: 2px solid #CD853F;
+  border: 2px solid #8d6e63;
 }
 
 .game-options h2 {
-  text-align: center;
-  color: #8B4513;
-  margin-bottom: var(--spacing-md);
   font-family: 'MedievalSharp', cursive;
+  color: #5d4037;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.5rem;
 }
 
 .mode-tabs {
   display: flex;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
-  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 .mode-tab {
   flex: 1;
-  padding: var(--spacing-md);
-  background-color: rgba(205, 133, 63, 0.3);
-  border: 2px solid #CD853F;
-  border-radius: 4px;
+  padding: 10px;
+  font-family: 'MedievalSharp', cursive;
+  background-color: #d7ccc8;
+  border: none;
+  border-radius: 5px;
+  margin: 0 5px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1rem;
-  color: #4B3621;
 }
 
 .mode-tab:hover {
-  background-color: rgba(205, 133, 63, 0.5);
+  background-color: #bcaaa4;
 }
 
 .mode-tab.active {
-  background-color: #8B4513;
-  color: #F5F5DC;
-  border-color: #A52A2A;
+  background-color: #8d6e63;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .start-button {
+  display: block;
   width: 100%;
-  padding: var(--spacing-md);
-  font-size: 1.3rem;
-  background-color: #A52A2A;
-  color: #F5F5DC;
+  padding: 15px;
+  font-family: 'MedievalSharp', cursive;
+  font-size: 18px;
+  background-color: #4caf50;
+  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: var(--spacing-md);
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
 }
 
 .start-button:hover:not(:disabled) {
-  background-color: #8B4513;
-  transform: translateY(-2px);
+  background-color: #388e3c;
 }
 
 .start-button:disabled {
-  background-color: #999;
+  background-color: #c8e6c9;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .waiting-message {
   text-align: center;
-  color: #A52A2A;
+  margin-top: 10px;
+  color: #8d6e63;
   font-style: italic;
-  margin-top: var(--spacing-md);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .lobby-container {
+    width: 95%;
+  }
+  
+  .mode-tabs {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .mode-tab {
+    margin: 0;
+  }
 } 

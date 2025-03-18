@@ -32,12 +32,14 @@
 }
 
 body {
-  font-family: var(--font-family);
-  background-color: var(--background-color);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'MedievalSharp', cursive;
   color: var(--text-color);
-  line-height: 1.6;
-  background-image: url(/assets/images/backgrounds/parchment.jpg);
+  background-image: url('../../assets/images/backgrounds/parchment.jpg');
   background-size: cover;
+  background-position: center;
   background-attachment: fixed;
 }
 

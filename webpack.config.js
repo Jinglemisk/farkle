@@ -62,13 +62,18 @@ module.exports = {
       directory: path.join(__dirname, 'public'),
     },
     hot: true,
-    port: 3000,
-    proxy: {
-      '/socket.io': {
-        target: 'http://localhost:3000',
-        ws: true
-      }
+    port: 8080,
+    historyApiFallback: true,
+    client: {
+      overlay: true,
     },
-    historyApiFallback: true
+    devMiddleware: {
+      writeToDisk: true
+    }
+  },
+  watchOptions: {
+    ignored: /node_modules|public/,
+    aggregateTimeout: 300,
+    poll: 1000
   }
 }; 

@@ -7,35 +7,63 @@
  * - Starting the game (host only)
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import '../styles/lobby.css';
 
 const Lobby = ({ socket, playerName, setPlayerName, players, gameMode, setGameMode }) => {
-  // Handler for joining game
-  const handleJoinGame = (e) => {
-    e.preventDefault();
-    if (playerName.trim()) {
-      socket.emit('joinGame', playerName);
-    }
-  };
+  const [joining, setJoining] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Handler for starting game (host only)
-  const handleStartGame = () => {
-    socket.emit('startGame', gameMode);
-  };
-
-  // Handler for game mode selection
-  const handleGameModeChange = (mode) => {
-    setGameMode(mode);
-  };
-
+  // Get player status - check if player is already in the game
+  const isPlayerJoined = players.some(player => player.id === socket.id);
+  
   // Determine if current player is the host (first player)
   const isHost = players.length > 0 && players[0].id === socket.id;
+
+  // Handler for joining game
+  const handleJoinGame = useCallback((e) => {
+    e.preventDefault();
+    
+    if (!playerName.trim()) {
+      setError('Please enter a name to join the game');
+      return;
+    }
+    
+    setJoining(true);
+    setError(null);
+    
+    // Emit join event to server
+    socket.emit('joinGame', playerName);
+    
+    // Set timeout to reset joining state if no response after 3 seconds
+    const timeout = setTimeout(() => {
+      setJoining(false);
+      setError('Failed to join game. Please try again.');
+    }, 3000);
+    
+    // Set up one-time event listener for join confirmation
+    socket.once('joinConfirmed', () => {
+      clearTimeout(timeout);
+      setJoining(false);
+    });
+  }, [playerName, socket]);
+
+  // Handler for starting game (host only)
+  const handleStartGame = useCallback(() => {
+    if (isHost) {
+      socket.emit('startGame', gameMode);
+    }
+  }, [socket, gameMode, isHost]);
+
+  // Handler for game mode selection
+  const handleGameModeChange = useCallback((mode) => {
+    setGameMode(mode);
+  }, [setGameMode]);
 
   return (
     <div className="lobby-container">
       <div className="tavern-header">
-        <h1>The Farkle Tavern</h1>
+        <h1>Lucky Roll Tavern</h1>
         <p className="tavern-keeper">Welcome, weary traveler! I am the Tavern Keeper.</p>
         <p className="tavern-description">
           Gather 'round the hearth, for tonight we shall play the ancient game of Farkle! 
@@ -43,8 +71,15 @@ const Lobby = ({ socket, playerName, setPlayerName, players, gameMode, setGameMo
         </p>
       </div>
 
+      {/* Error message */}
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
+        </div>
+      )}
+
       {/* Player join form */}
-      {!players.some(player => player.id === socket.id) ? (
+      {!isPlayerJoined ? (
         <form onSubmit={handleJoinGame} className="join-form">
           <div className="form-group">
             <label htmlFor="playerName">What shall I call thee, adventurer?</label>
@@ -55,9 +90,16 @@ const Lobby = ({ socket, playerName, setPlayerName, players, gameMode, setGameMo
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               required
+              disabled={joining}
             />
           </div>
-          <button type="submit" className="join-button">Enter the Tavern</button>
+          <button 
+            type="submit" 
+            className="join-button"
+            disabled={joining || !playerName.trim()}
+          >
+            {joining ? "Entering..." : "Enter the Tavern"}
+          </button>
         </form>
       ) : (
         <div className="welcome-message">
@@ -68,13 +110,17 @@ const Lobby = ({ socket, playerName, setPlayerName, players, gameMode, setGameMo
       {/* Player list */}
       <div className="player-list">
         <h2>Gathered Adventurers</h2>
-        <ul>
-          {players.map((player, index) => (
-            <li key={player.id}>
-              {player.name} {player.id === socket.id && "(Thou)"} {index === 0 && "(Tavern Master)"}
-            </li>
-          ))}
-        </ul>
+        {players.length === 0 ? (
+          <p className="no-players">The tavern awaits its first guest...</p>
+        ) : (
+          <ul>
+            {players.map((player, index) => (
+              <li key={player.id} className={player.id === socket.id ? 'current-player' : ''}>
+                {player.name} {player.id === socket.id && "(Thou)"} {index === 0 && "(Patron)"}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Game mode selection (host only) */}

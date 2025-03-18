@@ -14,319 +14,238 @@ const GAME_MODES = {
   Marathon: 7000
 };
 
-// Game state singleton
-const GameState = {
-  // Game properties
-  players: [],
-  gameInProgress: false,
-  gameMode: 'Sprint', // Default mode
-  currentPlayerIndex: -1,
-  
-  // Dice and scoring for current turn
-  currentDice: [],
-  selectedDice: [],
-  preBankedPoints: 0,
-  
-  // Game phase tracking
-  turnStarted: false,
-  rollAvailable: false,
-  hotDice: false,
-  
-  /**
-   * Reset the game state
-   */
+// Dice scoring rules
+const SCORING = {
+  // Single dice scores
+  single: {
+    1: 100,
+    5: 50
+  },
+  // Three of a kind scores
+  threeOfAKind: {
+    1: 1000,
+    2: 200,
+    3: 300,
+    4: 400,
+    5: 500,
+    6: 600
+  },
+  // Special combinations
+  straight: {
+    partial1: 500, // 1,2,3,4,5
+    partial2: 750, // 2,3,4,5,6
+    full: 1500     // 1,2,3,4,5,6
+  }
+};
+
+// Game state module
+class GameState {
+  constructor() {
+    this.resetGame();
+  }
+
+  // Reset the game to initial state
   resetGame() {
-    this.gameInProgress = false;
-    this.currentPlayerIndex = -1;
-    this.currentDice = [];
+    this.players = [];
+    this.scores = {};
+    this.gameMode = 'Sprint';
+    this.gameStarted = false;
+    this.currentTurn = null;
+    this.activeDice = [];
     this.selectedDice = [];
-    this.preBankedPoints = 0;
-    this.turnStarted = false;
-    this.rollAvailable = false;
-    this.hotDice = false;
-    
-    // Reset player scores but keep the players
-    this.players.forEach(player => {
-      player.score = 0;
-    });
-  },
-  
-  /**
-   * Add a new player to the game
-   * @param {string} id - Socket ID of the player
-   * @param {string} name - Player name
-   * @returns {Object} - The newly added player
-   */
-  addPlayer(id, name) {
-    // Don't add duplicates
-    if (this.players.some(player => player.id === id)) {
-      return this.getPlayer(id);
+    this.turnScore = 0;
+    this.rollCount = 0;
+    this.hasHotDice = false;
+  }
+
+  // Add a player to the game
+  addPlayer(playerId, playerName) {
+    if (!this.players.some(p => p.id === playerId)) {
+      const player = { id: playerId, name: playerName };
+      this.players.push(player);
+      this.scores[playerId] = 0;
+      return player;
     }
-    
-    const newPlayer = {
-      id,
-      name,
-      score: 0
-    };
-    
-    this.players.push(newPlayer);
-    return newPlayer;
-  },
-  
-  /**
-   * Remove a player from the game
-   * @param {string} id - Socket ID of the player to remove
-   */
-  removePlayer(id) {
-    const index = this.players.findIndex(player => player.id === id);
+    return this.players.find(p => p.id === playerId);
+  }
+
+  // Remove a player from the game
+  removePlayer(playerId) {
+    const index = this.players.findIndex(p => p.id === playerId);
     if (index !== -1) {
       this.players.splice(index, 1);
+      delete this.scores[playerId];
+      
+      if (this.currentTurn === playerId) {
+        this.moveToNextPlayer();
+      }
     }
-  },
+  }
   
-  /**
-   * Get a player by their socket ID
-   * @param {string} id - Socket ID of the player
-   * @returns {Object|null} - Player object or null if not found
-   */
-  getPlayer(id) {
-    return this.players.find(player => player.id === id) || null;
-  },
+  // Get win score based on game mode
+  getWinScore() {
+    return GAME_MODES[this.gameMode] || GAME_MODES.Sprint;
+  }
   
-  /**
-   * Get all players in the game
-   * @returns {Array} - Array of player objects
-   */
-  getPlayers() {
-    return [...this.players];
-  },
-  
-  /**
-   * Start a new game with the given mode
-   * @param {string} mode - Game mode (Rush, Sprint, Marathon)
-   */
+  // Start the game
   startGame(mode) {
     if (this.players.length < 2) {
-      return false; // Not enough players
+      return false;
     }
     
-    // Set game mode
-    this.gameMode = mode;
-    
-    // Randomize player order or implement initial dice roll logic
-    this.players = [...this.players].sort(() => Math.random() - 0.5);
-    
-    // Start with the first player
-    this.currentPlayerIndex = 0;
-    this.gameInProgress = true;
-    this.turnStarted = false;
-    this.rollAvailable = true;
+    this.gameMode = mode || 'Sprint';
+    this.gameStarted = true;
+    this.currentTurn = this.players[0].id;
     
     return true;
-  },
+  }
   
-  /**
-   * Get the current player
-   * @returns {Object|null} - Current player object or null if no game in progress
-   */
-  getCurrentPlayer() {
-    if (!this.gameInProgress || this.currentPlayerIndex === -1) {
+  // Roll dice for current player
+  rollDice(playerId) {
+    if (!this.gameStarted || this.currentTurn !== playerId) {
       return null;
     }
-    return this.players[this.currentPlayerIndex];
-  },
-  
-  /**
-   * Move to the next player's turn
-   */
-  nextTurn() {
-    // Reset turn state
-    this.currentDice = [];
-    this.selectedDice = [];
-    this.preBankedPoints = 0;
-    this.turnStarted = false;
-    this.rollAvailable = true;
-    this.hotDice = false;
     
-    // Move to next player
-    this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
-  },
-  
-  /**
-   * Roll the dice for the current player
-   * @returns {Array} - The resulting dice values
-   */
-  rollDice() {
-    if (!this.gameInProgress || !this.rollAvailable) {
-      return [];
-    }
+    // Determine number of dice to roll
+    const diceCount = this.hasHotDice ? 6 : (6 - this.selectedDice.length);
     
-    // Set turn as started
-    this.turnStarted = true;
-    
-    // Calculate how many dice to roll (6 if hot dice or starting, otherwise remaining dice)
-    const numDice = this.hotDice ? 6 : (this.currentDice.length === 0 ? 6 : this.currentDice.filter(die => !die.selected).length);
-    
-    // Generate random dice values
-    this.currentDice = Array.from({ length: numDice }, () => ({
-      value: Math.floor(Math.random() * 6) + 1, // 1-6
+    // Roll the dice
+    this.activeDice = Array.from({ length: diceCount }, () => ({
+      value: Math.floor(Math.random() * 6) + 1,
       selected: false
     }));
     
-    // Reset hot dice flag after rolling
-    this.hotDice = false;
+    this.rollCount++;
+    this.hasHotDice = false;
     
-    // After rolling, player must select at least one die before rolling again
-    this.rollAvailable = false;
+    // Check for Farkle (no scoring dice)
+    if (!this.hasScoringDice()) {
+      this.handleFarkle();
+      return { farkle: true, dice: this.activeDice };
+    }
     
-    return [...this.currentDice];
-  },
+    return { dice: this.activeDice };
+  }
   
-  /**
-   * Select a die from the current roll
-   * @param {number} index - Index of the die to select
-   * @returns {boolean} - Whether the selection was successful
-   */
-  selectDie(index) {
-    if (!this.gameInProgress || !this.turnStarted || this.rollAvailable) {
-      return false;
+  // Check if current roll has any scoring dice
+  hasScoringDice() {
+    // Check for any 1s or 5s
+    if (this.activeDice.some(die => die.value === 1 || die.value === 5)) {
+      return true;
     }
     
-    // Make sure the index is valid
-    if (index < 0 || index >= this.currentDice.length) {
-      return false;
+    // Check for three or more of a kind
+    for (let i = 1; i <= 6; i++) {
+      const count = this.activeDice.filter(die => die.value === i).length;
+      if (count >= 3) {
+        return true;
+      }
     }
     
-    // Make sure the die isn't already selected
-    if (this.currentDice[index].selected) {
-      return false;
-    }
-    
-    // Mark the die as selected
-    this.currentDice[index].selected = true;
-    
-    // Add to selected dice array
-    this.selectedDice.push({
-      value: this.currentDice[index].value
-    });
-    
-    // Calculate points from newly selected dice
-    // (This is a simplified version - actual scoring is more complex)
-    const value = this.currentDice[index].value;
-    if (value === 1) {
-      this.preBankedPoints += 100;
-    } else if (value === 5) {
-      this.preBankedPoints += 50;
-    }
-    // Note: This doesn't handle three-of-a-kind or other combinations yet
-    
-    // Check if all dice are now selected
-    if (this.currentDice.every(die => die.selected)) {
-      // Hot dice! All dice have been selected
-      this.hotDice = true;
-    }
-    
-    // After selecting a die, the player can roll again
-    this.rollAvailable = true;
-    
-    return true;
-  },
-  
-  /**
-   * Bank the currently accumulated points
-   * @returns {boolean} - Whether banking was successful
-   */
-  bankPoints() {
-    if (!this.gameInProgress || !this.turnStarted || this.preBankedPoints === 0) {
-      return false;
-    }
-    
-    // Add pre-banked points to the current player's score
-    const currentPlayer = this.getCurrentPlayer();
-    if (currentPlayer) {
-      currentPlayer.score += this.preBankedPoints;
-    }
-    
-    // Move to the next player
-    this.nextTurn();
-    
-    // Check for win condition
-    this.checkWinCondition();
-    
-    return true;
-  },
-  
-  /**
-   * Handle a Farkle (no scoring dice in the roll)
-   */
-  handleFarkle() {
-    // Player loses all pre-banked points for this turn
-    this.preBankedPoints = 0;
-    
-    // Move to the next player
-    this.nextTurn();
-  },
-  
-  /**
-   * Check if a player has won the game
-   * @returns {boolean} - Whether a player has won
-   */
-  checkWinCondition() {
-    const threshold = GAME_MODES[this.gameMode] || 4000;
-    
-    // Check if any player has reached the threshold
-    const winningPlayer = this.players.find(player => player.score >= threshold);
-    
-    if (winningPlayer) {
-      this.gameInProgress = false;
+    // Check for straights (simplified)
+    const values = this.activeDice.map(die => die.value).sort();
+    if (
+      (values.join(',') === '1,2,3,4,5,6') || 
+      (values.join(',') === '1,2,3,4,5') || 
+      (values.join(',') === '2,3,4,5,6')
+    ) {
       return true;
     }
     
     return false;
-  },
+  }
   
-  /**
-   * Handle a player disconnecting during the game
-   * @param {string} playerId - Socket ID of the disconnected player
-   */
-  handlePlayerDisconnect(playerId) {
-    // If it was the current player's turn, move to the next player
-    if (this.getCurrentPlayer()?.id === playerId) {
-      this.nextTurn();
+  // Handle a Farkle (no scoring dice)
+  handleFarkle() {
+    this.turnScore = 0;
+    this.selectedDice = [];
+    this.moveToNextPlayer();
+    return true;
+  }
+  
+  // Select a die from the current roll
+  selectDie(playerId, dieIndex) {
+    if (!this.gameStarted || this.currentTurn !== playerId || dieIndex >= this.activeDice.length) {
+      return false;
     }
     
-    // If there aren't enough players left, end the game
-    if (this.players.length < 2) {
-      this.gameInProgress = false;
+    const die = this.activeDice[dieIndex];
+    if (die.selected) {
+      return false;
     }
-  },
+    
+    // Mark the die as selected
+    die.selected = true;
+    
+    // Add to selected dice
+    this.selectedDice.push(die);
+    
+    // Calculate score (simplified - only handling singles for now)
+    if (die.value === 1) {
+      this.turnScore += SCORING.single[1];
+    } else if (die.value === 5) {
+      this.turnScore += SCORING.single[5];
+    }
+    
+    // Check for hot dice (all dice selected)
+    if (this.activeDice.every(die => die.selected)) {
+      this.hasHotDice = true;
+    }
+    
+    return true;
+  }
   
-  /**
-   * Check if a game is currently in progress
-   * @returns {boolean} - Whether a game is in progress
-   */
-  isGameInProgress() {
-    return this.gameInProgress;
-  },
+  // Bank points and end turn
+  bankPoints(playerId) {
+    if (!this.gameStarted || this.currentTurn !== playerId || this.turnScore === 0) {
+      return false;
+    }
+    
+    // Add points to player's score
+    this.scores[playerId] += this.turnScore;
+    
+    // Check for winner
+    const isWinner = this.scores[playerId] >= this.getWinScore();
+    
+    // Reset turn state
+    this.turnScore = 0;
+    this.selectedDice = [];
+    this.activeDice = [];
+    this.rollCount = 0;
+    this.hasHotDice = false;
+    
+    // Move to next player
+    this.moveToNextPlayer();
+    
+    return { success: true, winner: isWinner };
+  }
   
-  /**
-   * Get the current state of the game
-   * @returns {Object} - Current game state
-   */
+  // Move to the next player's turn
+  moveToNextPlayer() {
+    if (this.players.length === 0) {
+      this.currentTurn = null;
+      return;
+    }
+    
+    const currentIndex = this.players.findIndex(p => p.id === this.currentTurn);
+    const nextIndex = (currentIndex + 1) % this.players.length;
+    this.currentTurn = this.players[nextIndex].id;
+  }
+  
+  // Get current game state
   getGameState() {
     return {
-      players: this.getPlayers(),
-      gameInProgress: this.gameInProgress,
+      players: this.players,
+      scores: this.scores,
       gameMode: this.gameMode,
-      currentPlayer: this.getCurrentPlayer(),
-      currentDice: this.currentDice,
+      gameStarted: this.gameStarted,
+      currentTurn: this.currentTurn,
+      activeDice: this.activeDice,
       selectedDice: this.selectedDice,
-      preBankedPoints: this.preBankedPoints,
-      turnStarted: this.turnStarted,
-      rollAvailable: this.rollAvailable,
-      hotDice: this.hotDice
+      turnScore: this.turnScore,
+      hasHotDice: this.hasHotDice
     };
   }
-};
+}
 
-module.exports = GameState; 
+module.exports = new GameState(); 

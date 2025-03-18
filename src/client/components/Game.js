@@ -14,7 +14,7 @@
  * - Win conditions
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Dice from './Dice';
 import Scoreboard from './Scoreboard';
 import PlayerView from './PlayerView';
@@ -35,39 +35,47 @@ const Game = ({ socket, playerName, players, gameMode }) => {
     hasHotDice: false
   });
 
-  // Listen for game state updates from the server
-  useEffect(() => {
-    socket.on('gameState', (state) => {
-      setGameData(prev => ({
-        ...prev,
-        ...state,
-        // Determine if it's this player's turn
-        isMyTurn: state.currentPlayer && state.currentPlayer.id === socket.id
-      }));
-    });
-
-    // Clean up on unmount
-    return () => {
-      socket.off('gameState');
-    };
-  }, [socket]);
+  // Memoize event handlers to prevent recreating functions on each render
+  const handleGameState = useCallback((state) => {
+    setGameData(prev => ({
+      ...prev,
+      ...state,
+      // Determine if it's this player's turn
+      isMyTurn: state.currentPlayer && state.currentPlayer.id === socket.id
+    }));
+  }, [socket.id]);
 
   // Handler for rolling dice
-  const handleRoll = () => {
-    socket.emit('rollDice');
-  };
+  const handleRoll = useCallback(() => {
+    if (gameData.isMyTurn && gameData.canRoll) {
+      socket.emit('rollDice');
+    }
+  }, [socket, gameData.isMyTurn, gameData.canRoll]);
 
   // Handler for selecting dice
-  const handleSelectDie = (index) => {
+  const handleSelectDie = useCallback((index) => {
     if (gameData.isMyTurn) {
       socket.emit('selectDie', index);
     }
-  };
+  }, [socket, gameData.isMyTurn]);
 
   // Handler for banking points
-  const handleBank = () => {
-    socket.emit('bankPoints');
-  };
+  const handleBank = useCallback(() => {
+    if (gameData.isMyTurn && gameData.canBank) {
+      socket.emit('bankPoints');
+    }
+  }, [socket, gameData.isMyTurn, gameData.canBank]);
+
+  // Listen for game state updates from the server
+  useEffect(() => {
+    // Register event listener only once
+    socket.on('gameState', handleGameState);
+
+    // Clean up on unmount
+    return () => {
+      socket.off('gameState', handleGameState);
+    };
+  }, [socket, handleGameState]);
 
   return (
     <div className="game-container">
@@ -121,6 +129,7 @@ const Game = ({ socket, playerName, players, gameMode }) => {
         <button 
           onClick={handleRoll}
           disabled={!gameData.isMyTurn || !gameData.canRoll}
+          className={`game-button ${gameData.isMyTurn && gameData.canRoll ? 'active' : ''}`}
         >
           {gameData.hasHotDice ? "Roll (Hot Dice!)" : "Roll Dice"}
         </button>
@@ -128,6 +137,7 @@ const Game = ({ socket, playerName, players, gameMode }) => {
         <button 
           onClick={handleBank}
           disabled={!gameData.isMyTurn || !gameData.canBank}
+          className={`game-button ${gameData.isMyTurn && gameData.canBank ? 'active' : ''}`}
         >
           Bank {gameData.preBankedPoints} Points
         </button>
