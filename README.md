@@ -1,5 +1,64 @@
-# Farkle!
-My hobby attempt at making Farkle, the dice game.
+# Farkle Game
+
+A multiplayer dice game where players take turns rolling dice, banking points, and trying to reach the score threshold.
+
+## Game Overview
+
+Farkle is a classic press-your-luck dice game. Players take turns rolling six dice and setting aside scoring combinations. They can choose to bank their points or roll again with remaining dice, risking losing all points for the turn if no scoring combinations appear.
+
+## Game Modes
+
+The game supports three different modes, each with a different score target:
+
+- **Rush Mode**: First player to reach 2,000 points wins
+- **Sprint Mode**: First player to reach 4,000 points wins
+- **Marathon Mode**: First player to reach 7,000 points wins
+
+## Current Status
+
+This project is currently under development. The initial lobby system is functional, allowing players to:
+
+- Join the game with a username
+- See other connected players
+- Change game modes (if you're the host)
+- Start the game (if you're the host)
+
+The actual gameplay mechanics will be implemented in future updates.
+
+## Getting Started
+
+See the [Installation Guide](./INSTALLATION.md) for detailed setup instructions.
+
+### Quick Start
+
+1. Install dependencies:
+   ```
+   npm install
+   ```
+
+2. Run the server:
+   ```
+   npm run dev
+   ```
+
+3. Open your browser and navigate to:
+   ```
+   http://localhost:8765
+   ```
+
+## Technologies Used
+
+- **Backend**: Node.js, Express, Socket.io
+- **Frontend**: HTML, CSS, JavaScript
+
+## License
+
+This project is licensed under the MIT License.
+
+## Acknowledgments
+
+- Inspired by the classic Farkle dice game
+- Medieval-themed UI design to enhance the gaming experience
 
 # Game Design Document
 
@@ -16,7 +75,7 @@ My hobby attempt at making Farkle, the dice game.
 ## Features
 
 - Lobby: All players will join a lobby before starting the game.
-    - Players enter their name and click “Join Game”, whereby they are placed on a “Players” list.
+    - Players enter their name and click "Join Game", whereby they are placed on a "Players" list.
     - The host chooses between three game modes (Rush, Sprint, Marathon) before starting the game, which sets the win condition.
 - Game Screen: A top-down roundtable view of the game table.
     - Shows the present players in the game
@@ -26,11 +85,11 @@ My hobby attempt at making Farkle, the dice game.
 
 ### Multiplayer Component
 
-Farkle uses “NGROK” to facilitate player inviting to this locally-hosted browser game.
+Farkle uses "NGROK" to facilitate player inviting to this locally-hosted browser game.
 
 ### Game Flow Summary
 
-- Players join the lobby by entering their name and press “Join”
+- Players join the lobby by entering their name and press "Join"
 - When all players join the game, the host starts the game.
 - Each player and host rolls one 6-sided die to determine the start order.
     - If two or more players roll a 6, then they must reroll until one of them is the sole winner.
@@ -43,7 +102,7 @@ Farkle uses “NGROK” to facilitate player inviting to this locally-hosted bro
 Each player throws one die to determine the round order. The player who scored the highest (6) wins, and it goes clockwise from there. The following explains how one player completes their turn:
 
 - The player with their turn rolls all of their six die at once.
-- After each throw, at least one scoring die must be set aside to continue the turn. This is called a “pre-bank”.
+- After each throw, at least one scoring die must be set aside to continue the turn. This is called a "pre-bank".
 - The player may then either end their turn and bank the score accumulated so far or continue to throw the remaining dice.
 - If the player has scored all six dice they have, they have "hot dice" and may continue their turn with a new throw of all six dice, adding to the score they have already accumulated.
     - In this case, the points that have been
@@ -52,16 +111,16 @@ Each player throws one die to determine the round order. The player who scored t
 
 ### Winning Farkle
 
-Once a player has achieved a winning point total, each other player has one last turn to score enough points to surpass that high-score. Should the game extend because of this, each player’s score is halved to the maximum of the game mode selected.
+Once a player has achieved a winning point total, each other player has one last turn to score enough points to surpass that high-score. Should the game extend because of this, each player's score is halved to the maximum of the game mode selected.
 
 For example, if three players are in a Sprint game, and two players managed to exceed the score of 4000 points:
 
-- The third player who couldn’t make it is eliminated from the game.
-- Other two players’ scores are halved to 2000 each, and the turn order continues regularly.
+- The third player who couldn't make it is eliminated from the game.
+- Other two players' scores are halved to 2000 each, and the turn order continues regularly.
 
 ## **Scoring Rules**
 
-The following are the points awarded by the scoring die that have been banked at the end of a player’s turn. 
+The following are the points awarded by the scoring die that have been banked at the end of a player's turn. 
 
 ### **Single Dice Scores:**
 
@@ -100,7 +159,7 @@ Three example descriptions of how **the lobby host** and **invited** **players**
 
 - The host launches the game via localhost.
 - As they are waiting in the lobby, they can choose between **Rush**, **Sprint** and **Marathon** game modes.
-- When all players join, the host clicks “Start Farkle!” to launch the game.
+- When all players join, the host clicks "Start Farkle!" to launch the game.
 - All players roll a single die to determine who goes first.
 - Host has rolled 2, Player A has rolled 6 and Player B has rolled a 4.
     - Player A, Player B and the Host are placed on the table in clockwise order.
@@ -110,7 +169,7 @@ Three example descriptions of how **the lobby host** and **invited** **players**
     - Host has rolled a one, a one, a one, a five, a five, and a five
     - Three ones equal to 1000 points, and three fives equal 500 points.
     - They pre-bank all their dice for 1500 points
-    - Since all of their dice have been put aside, they have “Hot dice!”, whereby they can roll all of their six dice again without losing their pre-banked points.
+    - Since all of their dice have been put aside, they have "Hot dice!", whereby they can roll all of their six dice again without losing their pre-banked points.
 - Lobby Host rolls all of their six dice with 1500 pre-banked points.
     - Host has rolled a five, a five, a one, a six, a two, and a three
     - Host decides to bank the two fives and one one, resulting in 200 points.
@@ -120,15 +179,15 @@ Three example descriptions of how **the lobby host** and **invited** **players**
 ## Player A POV
 
 - Player A has received a link to visit the game lobby.
-- Player A enters their name on the screen and clicks “Join”
-    - Their name is now present in the “Players” list
-- They wait for the host to click “Start Farkle!” to launch the game.
+- Player A enters their name on the screen and clicks "Join"
+    - Their name is now present in the "Players" list
+- They wait for the host to click "Start Farkle!" to launch the game.
 - All players roll a single die to determine who goes first.
 - Host has rolled 2, Player A has rolled 6 and Player B has rolled a 4.
     - Player A, Player B and the Host are placed on the table in clockwise order.
 - Player A begins the game by rolling all of their six dice.
     - Player A has rolled a one, a three, a three, a six, a five, and a two
-    - Since “one” has the highest score among the 6 dice, they “pre-bank” the one, and roll again
+    - Since "one" has the highest score among the 6 dice, they "pre-bank" the one, and roll again
 - Player A rolls again with five dice, with their one die pre-banked for 100 points.
     - Player A has rolled a two, a six, a six, a six, and a five.
     - Player A pre-banks the three sixes, pre-banking 600 points worth of die.
@@ -137,13 +196,13 @@ Three example descriptions of how **the lobby host** and **invited** **players**
 ## Player B POV
 
 - Player B has received a link to visit the game lobby.
-- Player B enters their name on the screen and clicks “Join”
-    - Their name is now present in the “Players” list
-- They wait for the host to click “Start Farkle!” to launch the game.
+- Player B enters their name on the screen and clicks "Join"
+    - Their name is now present in the "Players" list
+- They wait for the host to click "Start Farkle!" to launch the game.
 - All players roll a single die to determine who goes first.
 - Host has rolled 2, Player A has rolled 6 and Player B has rolled a 4.
     - Player A, Player B and the Host are placed on the table in clockwise order.
-- Player B waits until the Player A’s turn is up.
+- Player B waits until the Player A's turn is up.
 - When it is their turn, Player A begins the game by rolling all of their six dice.
     - Player B has rolled a three, a three, a three, a one, and a one
     - They decide to pre-bank all their scoring die, 3x3 and 1x1, for a total of 300+100 = 400 points.

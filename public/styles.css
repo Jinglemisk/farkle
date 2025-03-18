@@ -1,0 +1,181 @@
+/* Base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'MedievalSharp', cursive, sans-serif;
+  background-color: #2c1b0e;
+  color: #e8d0a9;
+  line-height: 1.6;
+  /* Background image will be added later */
+  /* background-image: url('assets/images/backgrounds/tavern-bg.jpg'); */
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Lobby styles */
+h1 {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ffd700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #ffd700;
+  border-bottom: 2px solid #8b6b3c;
+  padding-bottom: 5px;
+}
+
+.game-description {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 30px;
+  background-color: rgba(59, 41, 22, 0.8);
+  padding: 15px;
+  border-radius: 8px;
+  border: 2px solid #8b6b3c;
+}
+
+.player-form {
+  background-color: rgba(59, 41, 22, 0.8);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 2px solid #8b6b3c;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #8b6b3c;
+  border-radius: 4px;
+  background-color: #e8d0a9;
+  color: #2c1b0e;
+  font-family: 'MedievalSharp', cursive, sans-serif;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #8b6b3c;
+  color: #e8d0a9;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: 'MedievalSharp', cursive, sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #a58149;
+}
+
+.btn:disabled {
+  background-color: #5a4828;
+  cursor: not-allowed;
+}
+
+.game-lobby {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.lobby-section {
+  background-color: rgba(59, 41, 22, 0.8);
+  padding: 20px;
+  border-radius: 8px;
+  border: 2px solid #8b6b3c;
+}
+
+.players-list {
+  list-style-type: none;
+}
+
+.players-list li {
+  padding: 10px;
+  margin-bottom: 5px;
+  background-color: rgba(44, 27, 14, 0.6);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.players-list .host {
+  color: #ffd700;
+}
+
+.players-list .ready {
+  color: #50c878;
+}
+
+.game-mode-options {
+  display: flex;
+  gap: 10px;
+}
+
+.mode-btn {
+  padding: 8px 12px;
+  background-color: #3b2916;
+  color: #e8d0a9;
+  border: 1px solid #8b6b3c;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'MedievalSharp', cursive, sans-serif;
+  flex: 1;
+}
+
+.mode-btn:hover {
+  background-color: #4e3720;
+}
+
+.mode-btn.selected {
+  background-color: #8b6b3c;
+  border-color: #ffd700;
+}
+
+.btn-start {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  background-color: #5a7f2e;
+  font-size: 1.2rem;
+}
+
+.btn-start:hover {
+  background-color: #6d9638;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .game-lobby {
+    grid-template-columns: 1fr;
+  }
+} 
