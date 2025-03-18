@@ -1,0 +1,95 @@
+/**
+ * Styles for the Game component
+ */
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.game-table {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  width: 100%;
+  padding: var(--spacing-lg);
+  background-color: rgba(139, 69, 19, 0.2);
+  border-radius: 50%;
+  border: 8px solid var(--primary-color);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  min-height: 400px;
+}
+
+.dice-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: rgba(245, 222, 179, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dice-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+.pre-bank-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: rgba(205, 133, 63, 0.3);
+  border-radius: 8px;
+  border: 2px dashed var(--secondary-color);
+}
+
+.selected-dice {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+.game-controls {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  width: 100%;
+  padding: var(--spacing-md);
+}
+
+.game-controls button {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 1.2rem;
+  min-width: 150px;
+}
+
+.game-controls button:first-child {
+  background-color: var(--primary-color);
+}
+
+.game-controls button:last-child {
+  background-color: var(--accent-color);
+}
+
+.game-status {
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+  padding: var(--spacing-md);
+  color: var(--primary-color);
+} 
