@@ -43,8 +43,10 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['websocket', 'polling']
 });
 
 // Initialize Socket.io handlers
@@ -52,7 +54,8 @@ initializeSocketHandlers(io, gameState);
 
 // Start server
 const PORT = process.env.PORT || 8765;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Game available at http://localhost:${PORT}`);
+  console.log(`Local access: http://localhost:${PORT}`);
+  console.log(`Network access: http://<your-ip-address>:${PORT}`);
 });
