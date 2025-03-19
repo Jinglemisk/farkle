@@ -20,6 +20,11 @@ const App = ({ socket }) => {
   const [gameStarted, setGameStarted] = useState(false);
   const [connectionError, setConnectionError] = useState('');
   const [reconnecting, setReconnecting] = useState(false);
+  const [currentTurn, setCurrentTurn] = useState(null);
+  const [currentRoll, setCurrentRoll] = useState([]);
+  const [selectedDice, setSelectedDice] = useState([]);
+  const [preBankedPoints, setPreBankedPoints] = useState(0);
+  const [hasHotDice, setHasHotDice] = useState(false);
 
   // Socket event listeners
   useEffect(() => {
@@ -51,21 +56,103 @@ const App = ({ socket }) => {
     // Game state handlers
     const handleGameState = (state) => {
       console.log('Received game state:', state);
-      setPlayers(state.players || []);
-      setGameMode(state.gameMode || 'Sprint');
-      setGameStarted(state.gameStarted || false);
+      if (state.players) {
+        setPlayers(state.players);
+      }
+      if (state.gameMode) {
+        setGameMode(state.gameMode);
+      }
+      if (state.gameStarted !== undefined) {
+        setGameStarted(state.gameStarted);
+      }
+      if (state.currentTurn !== undefined) {
+        setCurrentTurn(state.currentTurn);
+      }
+      if (state.currentRoll) {
+        setCurrentRoll(state.currentRoll);
+      }
+      if (state.selectedDice) {
+        setSelectedDice(state.selectedDice);
+      }
+      if (state.preBankedPoints !== undefined) {
+        setPreBankedPoints(state.preBankedPoints);
+      }
+      if (state.hasHotDice !== undefined) {
+        setHasHotDice(state.hasHotDice);
+      }
     };
     
     const handlePlayerJoined = (data) => {
       console.log('Player joined:', data);
-      setPlayers(data.players || []);
+      if (data.players) {
+        setPlayers(data.players);
+      }
     };
 
     const handleGameStarted = (data) => {
       console.log('Game started:', data);
       setGameStarted(true);
-      setPlayers(data.players || []);
-      setGameMode(data.gameMode || gameMode);
+      if (data.players) {
+        setPlayers(data.players);
+      }
+      if (data.gameMode) {
+        setGameMode(data.gameMode);
+      }
+      if (data.currentTurn !== undefined) {
+        setCurrentTurn(data.currentTurn);
+      }
+      if (data.currentRoll) {
+        setCurrentRoll(data.currentRoll);
+      }
+      if (data.selectedDice) {
+        setSelectedDice(data.selectedDice);
+      }
+      if (data.preBankedPoints !== undefined) {
+        setPreBankedPoints(data.preBankedPoints);
+      }
+      if (data.hasHotDice !== undefined) {
+        setHasHotDice(data.hasHotDice);
+      }
+    };
+
+    const handleDiceRolled = (data) => {
+      console.log('Dice rolled:', data);
+      if (data.currentRoll) {
+        setCurrentRoll(data.currentRoll);
+      }
+      if (data.hasHotDice !== undefined) {
+        setHasHotDice(data.hasHotDice);
+      }
+    };
+
+    const handleDiceSelected = (data) => {
+      console.log('Dice selected:', data);
+      if (data.currentRoll) {
+        setCurrentRoll(data.currentRoll);
+      }
+      if (data.selectedDice) {
+        setSelectedDice(data.selectedDice);
+      }
+      if (data.preBankedPoints !== undefined) {
+        setPreBankedPoints(data.preBankedPoints);
+      }
+      if (data.hasHotDice !== undefined) {
+        setHasHotDice(data.hasHotDice);
+      }
+    };
+
+    const handlePointsBanked = (data) => {
+      console.log('Points banked:', data);
+      if (data.players) {
+        setPlayers(data.players);
+      }
+      if (data.currentTurn !== undefined) {
+        setCurrentTurn(data.currentTurn);
+      }
+      setCurrentRoll([]);
+      setSelectedDice([]);
+      setPreBankedPoints(0);
+      setHasHotDice(false);
     };
 
     // Register event listeners
@@ -77,6 +164,9 @@ const App = ({ socket }) => {
     socket.on('gameState', handleGameState);
     socket.on('playerJoined', handlePlayerJoined);
     socket.on('gameStarted', handleGameStarted);
+    socket.on('diceRolled', handleDiceRolled);
+    socket.on('diceSelected', handleDiceSelected);
+    socket.on('pointsBanked', handlePointsBanked);
 
     // Clean up on unmount
     return () => {
@@ -88,6 +178,9 @@ const App = ({ socket }) => {
       socket.off('gameState', handleGameState);
       socket.off('playerJoined', handlePlayerJoined);
       socket.off('gameStarted', handleGameStarted);
+      socket.off('diceRolled', handleDiceRolled);
+      socket.off('diceSelected', handleDiceSelected);
+      socket.off('pointsBanked', handlePointsBanked);
     };
   }, [socket, gameMode]);
 
@@ -122,13 +215,18 @@ const App = ({ socket }) => {
   // Render the current game state
   return gameStarted ? (
     <Game 
-      socket={socket} 
-      playerName={playerName}
+      key="game"
       players={players}
       gameMode={gameMode}
+      currentTurn={currentTurn}
+      currentRoll={currentRoll}
+      selectedDice={selectedDice}
+      preBankedPoints={preBankedPoints}
+      hasHotDice={hasHotDice}
     />
   ) : (
     <Lobby
+      key="lobby"
       socket={socket}
       playerName={playerName}
       setPlayerName={setPlayerName}

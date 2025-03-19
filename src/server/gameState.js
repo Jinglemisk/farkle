@@ -76,17 +76,58 @@ const initGameState = () => {
     
     // Start the game
     startGame() {
-      if (this.players.length < 2) return false;
-      
-      // Roll for turn order
-      const turnOrder = this.players.map(player => ({
-        ...player,
+      if (this.players.length < 2) {
+        return false;
+      }
+
+      // Roll initial dice for turn order
+      const initialRolls = this.players.map(player => ({
+        id: player.id,
+        name: player.name,
         roll: Math.floor(Math.random() * 6) + 1
-      })).sort((a, b) => b.roll - a.roll);
-      
-      // Set first player
-      this.currentTurn = turnOrder[0].id;
+      }));
+
+      // Check for ties and reroll until no ties
+      let hasTies = true;
+      while (hasTies) {
+        hasTies = false;
+        const maxRoll = Math.max(...initialRolls.map(r => r.roll));
+        const tiedPlayers = initialRolls.filter(r => r.roll === maxRoll);
+        
+        if (tiedPlayers.length > 1) {
+          hasTies = true;
+          // Reroll only for tied players
+          tiedPlayers.forEach(player => {
+            player.roll = Math.floor(Math.random() * 6) + 1;
+          });
+        }
+      }
+
+      // Sort players by roll (highest first)
+      initialRolls.sort((a, b) => b.roll - a.roll);
+
+      // Update player order based on rolls
+      this.players = initialRolls.map(roll => {
+        const player = this.players.find(p => p.id === roll.id);
+        return {
+          ...player,
+          roll: roll.roll
+        };
+      });
+
+      // Set game state
       this.gameStarted = true;
+      this.currentTurn = this.players[0].id; // First player goes first
+      this.currentRoll = [];
+      this.selectedDice = [];
+      this.preBankedPoints = 0;
+      this.hasHotDice = false;
+
+      // Reset scores
+      this.players.forEach(p => {
+        p.score = 0;
+        p.isReady = false;
+      });
       return true;
     },
     
@@ -119,11 +160,46 @@ const initGameState = () => {
     rollDice(playerId) {
       if (playerId !== this.currentTurn) return false;
       
+      // Check if player has selected at least one die before rolling again
+      if (this.currentRoll.length > 0 && this.selectedDice.length === 0) {
+        return { error: 'Must select at least one scoring die before rolling again' };
+      }
+      
       // If hot dice, roll all 6 dice
       const numDice = this.hasHotDice ? 6 : (6 - this.selectedDice.length);
       this.currentRoll = Array(numDice).fill(0).map(() => Math.floor(Math.random() * 6) + 1);
       this.hasHotDice = false;
-      return true;
+
+      // Check for Farkle (no scoring dice available)
+      const hasScoringDice = this.currentRoll.some(value => {
+        // Check for singles (1 or 5)
+        if (value === 1 || value === 5) return true;
+        
+        // Check for three of a kind
+        const count = this.currentRoll.filter(v => v === value).length;
+        if (count >= 3) return true;
+        
+        // Check for straight (only possible with 6 dice)
+        if (this.currentRoll.length === 6 && this.isStraight(this.currentRoll)) return true;
+        
+        return false;
+      });
+
+      if (!hasScoringDice) {
+        // Player has Farkled - lose all pre-banked points and end turn
+        this.preBankedPoints = 0;
+        this.selectedDice = [];
+        this.currentRoll = [];
+        
+        // Move to next player
+        const currentIndex = this.players.findIndex(p => p.id === playerId);
+        const nextIndex = (currentIndex + 1) % this.players.length;
+        this.currentTurn = this.players[nextIndex].id;
+        
+        return { farkle: true };
+      }
+
+      return { success: true, currentRoll: this.currentRoll };
     },
 
     // Select dice for scoring

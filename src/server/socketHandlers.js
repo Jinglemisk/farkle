@@ -76,14 +76,41 @@ const initializeSocketHandlers = (io, gameState) => {
         console.log('Start game result:', success);
         
         if (success) {
+          // Get initial rolls from players with their roll values
+          const initialRolls = gameState.players.map(player => ({
+            id: player.id,
+            name: player.name,
+            roll: player.roll
+          }));
+
           // Emit game started event with full game state
           io.emit('gameStarted', {
-            currentTurn: gameState.currentTurn,
             players: gameState.players,
             gameMode: gameState.gameMode,
-            gameStarted: true
+            gameStarted: true,
+            currentTurn: gameState.currentTurn,
+            initialRolls: initialRolls,
+            currentRoll: [],
+            selectedDice: [],
+            preBankedPoints: 0,
+            hasHotDice: false
           });
-          console.log('Game started');
+
+          // After a short delay, emit the game state to start the first turn
+          setTimeout(() => {
+            io.emit('gameState', {
+              players: gameState.players,
+              gameMode: gameState.gameMode,
+              gameStarted: true,
+              currentTurn: gameState.currentTurn,
+              currentRoll: [],
+              selectedDice: [],
+              preBankedPoints: 0,
+              hasHotDice: false
+            });
+          }, 3000); // 3 second delay to show initial rolls
+
+          console.log('Game started with initial rolls:', initialRolls);
         } else {
           socket.emit('error', { message: 'Not enough players to start the game' });
         }
@@ -94,8 +121,38 @@ const initializeSocketHandlers = (io, gameState) => {
     
     // Handle dice roll
     socket.on('rollDice', () => {
-      const success = gameState.rollDice(socket.id);
-      if (success) {
+      const result = gameState.rollDice(socket.id);
+      
+      if (result.error) {
+        socket.emit('error', { message: result.error });
+        return;
+      }
+      
+      if (result.farkle) {
+        // Notify all players about the Farkle and turn change
+        io.emit('farkle', {
+          players: gameState.players,
+          currentTurn: gameState.currentTurn,
+          currentRoll: [],
+          selectedDice: [],
+          preBankedPoints: 0,
+          hasHotDice: false
+        });
+
+        // Also emit a game state update to ensure synchronization
+        io.emit('gameState', {
+          players: gameState.players,
+          currentTurn: gameState.currentTurn,
+          currentRoll: [],
+          selectedDice: [],
+          preBankedPoints: 0,
+          hasHotDice: false,
+          gameStarted: gameState.gameStarted
+        });
+        return;
+      }
+      
+      if (result.success) {
         io.emit('diceRolled', {
           currentRoll: gameState.currentRoll,
           hasHotDice: gameState.hasHotDice
@@ -124,13 +181,53 @@ const initializeSocketHandlers = (io, gameState) => {
     socket.on('bankPoints', () => {
       const success = gameState.bankPoints(socket.id);
       if (success) {
+        // Get the updated player scores and current turn
+        const updatedPlayers = gameState.players.map(player => ({
+          id: player.id,
+          name: player.name,
+          score: player.score,
+          isHost: player.isHost
+        }));
+
+        // Emit full game state update to ensure next player starts fresh
         io.emit('pointsBanked', {
-          players: gameState.players,
-          currentTurn: gameState.currentTurn
+          players: updatedPlayers, // Send updated player scores
+          currentTurn: gameState.currentTurn,
+          currentRoll: [], // Reset dice for next player
+          selectedDice: [], // Reset selected dice
+          preBankedPoints: 0, // Reset pre-banked points
+          hasHotDice: false, // Reset hot dice status
+          gameMode: gameState.gameMode // Include game mode for win condition checking
+        });
+
+        // Also emit a separate game state update to ensure consistency
+        io.emit('gameState', {
+          players: updatedPlayers,
+          currentTurn: gameState.currentTurn,
+          currentRoll: [],
+          selectedDice: [],
+          preBankedPoints: 0,
+          hasHotDice: false,
+          gameMode: gameState.gameMode,
+          gameStarted: gameState.gameStarted
         });
       } else {
         socket.emit('error', { message: 'Not your turn' });
       }
+    });
+    
+    // Handle request for game state update
+    socket.on('requestGameState', () => {
+      io.emit('gameState', {
+        players: gameState.players,
+        gameMode: gameState.gameMode,
+        gameStarted: gameState.gameStarted,
+        currentTurn: gameState.currentTurn,
+        currentRoll: gameState.currentRoll,
+        selectedDice: gameState.selectedDice,
+        preBankedPoints: gameState.preBankedPoints,
+        hasHotDice: gameState.hasHotDice
+      });
     });
     
     // Handle disconnection
