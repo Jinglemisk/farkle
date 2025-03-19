@@ -1,125 +1,149 @@
 /**
- * Styles for the Game component
+ * Game styles
+ * Basic styling for the game interface
  */
 
 .game-container {
-  width: 90%;
-  max-width: 1200px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.game-container h1 {
-  font-family: 'MedievalSharp', cursive;
   text-align: center;
-  color: #5d4037;
-  margin-bottom: 30px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.game-table {
+/* Scoreboard */
+.scoreboard {
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.players-list {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 20px;
-  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-.dice-section {
-  margin-bottom: 30px;
+.player-score {
+  padding: 8px 15px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.dice-section h2 {
-  font-family: 'MedievalSharp', cursive;
-  color: #5d4037;
-  margin-bottom: 10px;
+.player-score.current-turn {
+  background-color: #e3f2fd;
+  border: 2px solid #2196f3;
+}
+
+/* Dice sections */
+.dice-section,
+.selected-dice-section {
+  margin-bottom: 30px;
 }
 
 .dice-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
   justify-content: center;
-}
-
-.pre-bank-section {
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.pre-bank-section h2 {
-  font-family: 'MedievalSharp', cursive;
-  color: #5d4037;
-  margin-bottom: 10px;
-}
-
-.selected-dice {
-  display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  justify-content: center;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
+.die {
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.die:hover:not(.selected) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.die.selected {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+  cursor: default;
+}
+
+/* Pre-bank section */
+.pre-bank-section {
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+/* Game controls */
 .game-controls {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 15px;
   margin-bottom: 30px;
 }
 
 .game-button {
-  padding: 12px 24px;
-  font-family: 'MedievalSharp', cursive;
+  padding: 10px 20px;
   font-size: 16px;
-  background-color: #8d6e63;
-  color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
+  background-color: #e0e0e0;
+  color: #666;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .game-button:hover:not(:disabled) {
-  background-color: #5d4037;
-}
-
-.game-button:disabled {
-  background-color: #d7ccc8;
-  cursor: not-allowed;
-  opacity: 0.7;
+  background-color: #d0d0d0;
 }
 
 .game-button.active {
-  background-color: #4caf50;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px);
+  background-color: #2196f3;
+  color: white;
 }
 
-.game-button.active:hover {
-  background-color: #388e3c;
+.game-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.game-status {
-  text-align: center;
-  font-size: 18px;
-  color: #5d4037;
-  font-weight: bold;
+/* Turn indicator */
+.turn-indicator {
   margin-top: 20px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
 }
 
-@media (max-width: 768px) {
+/* Responsive design */
+@media (max-width: 600px) {
+  .game-container {
+    padding: 10px;
+  }
+  
+  .die {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
   .game-controls {
     flex-direction: column;
-    align-items: center;
   }
   
   .game-button {
-    width: 80%;
-    margin-bottom: 10px;
+    width: 100%;
   }
 }
 

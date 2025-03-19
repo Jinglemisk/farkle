@@ -7,7 +7,7 @@
  * - Starting the game (host only)
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import '../styles/lobby.css';
 
 const Lobby = ({ socket, playerName, setPlayerName, players, gameMode, setGameMode }) => {
@@ -33,7 +33,7 @@ const Lobby = ({ socket, playerName, setPlayerName, players, gameMode, setGameMo
     setError(null);
     
     // Emit join event to server
-    socket.emit('joinGame', playerName);
+    socket.emit('joinGame', { playerName });
     
     // Set timeout to reset joining state if no response after 3 seconds
     const timeout = setTimeout(() => {
@@ -42,23 +42,47 @@ const Lobby = ({ socket, playerName, setPlayerName, players, gameMode, setGameMo
     }, 3000);
     
     // Set up one-time event listener for join confirmation
-    socket.once('joinConfirmed', () => {
+    socket.once('playerJoined', (data) => {
       clearTimeout(timeout);
       setJoining(false);
+      
+      // Check if this player was added successfully
+      const playerAdded = data.players.some(p => p.id === socket.id);
+      if (!playerAdded) {
+        setError('Failed to join the game. Please try again.');
+      }
     });
   }, [playerName, socket]);
 
   // Handler for starting game (host only)
   const handleStartGame = useCallback(() => {
     if (isHost) {
-      socket.emit('startGame', gameMode);
+      console.log('Emitting startGame event');
+      socket.emit('startGame');
     }
-  }, [socket, gameMode, isHost]);
+  }, [socket, isHost]);
 
   // Handler for game mode selection
   const handleGameModeChange = useCallback((mode) => {
-    setGameMode(mode);
-  }, [setGameMode]);
+    if (isHost) {
+      socket.emit('setGameMode', { mode });
+      setGameMode(mode);
+    }
+  }, [socket, setGameMode, isHost]);
+
+  // Listen for socket errors
+  useEffect(() => {
+    const handleError = (error) => {
+      setError(error.message);
+      setTimeout(() => setError(null), 5000);
+    };
+    
+    socket.on('error', handleError);
+    
+    return () => {
+      socket.off('error', handleError);
+    };
+  }, [socket]);
 
   return (
     <div className="lobby-container">

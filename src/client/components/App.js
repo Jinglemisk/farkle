@@ -9,10 +9,10 @@
 import React, { useState, useEffect } from 'react';
 import Lobby from './Lobby';
 import Game from './Game';
+import '../styles/main.css';
 
 const App = ({ socket }) => {
   // Game state
-  const [gameState, setGameState] = useState('lobby'); // 'lobby' or 'game'
   const [playerName, setPlayerName] = useState('');
   const [players, setPlayers] = useState([]);
   const [gameMode, setGameMode] = useState('Sprint'); // Default game mode
@@ -24,70 +24,72 @@ const App = ({ socket }) => {
   // Socket event listeners
   useEffect(() => {
     // Connection event handlers
-    const onConnect = () => {
+    const handleConnect = () => {
+      console.log('Connected to server');
       setIsConnected(true);
       setConnectionError('');
       setReconnecting(false);
     };
 
-    const onDisconnect = () => {
+    const handleDisconnect = () => {
+      console.log('Disconnected from server');
       setIsConnected(false);
-    };
-
-    const onConnectionError = (error) => {
-      setConnectionError(error || 'Could not connect to server');
-      setIsConnected(false);
-    };
-
-    const onReconnecting = () => {
       setReconnecting(true);
     };
 
+    const handleReconnect = () => {
+      console.log('Reconnected to server');
+      setIsConnected(true);
+      setReconnecting(false);
+    };
+
+    const handleError = (error) => {
+      console.error('Connection error:', error);
+      setConnectionError(typeof error === 'string' ? error : 'Failed to connect to the server');
+    };
+
     // Game state handlers
-    const onGameStart = () => {
+    const handleGameState = (state) => {
+      console.log('Received game state:', state);
+      setPlayers(state.players || []);
+      setGameMode(state.gameMode || 'Sprint');
+      setGameStarted(state.gameStarted || false);
+    };
+    
+    const handlePlayerJoined = (data) => {
+      console.log('Player joined:', data);
+      setPlayers(data.players || []);
+    };
+
+    const handleGameStarted = (data) => {
+      console.log('Game started:', data);
       setGameStarted(true);
-    };
-
-    const onGameEnd = () => {
-      setGameStarted(false);
-    };
-
-    // Game state listeners
-    const onGameStarted = () => {
-      setGameState('game');
-    };
-
-    const onPlayerList = (playerList) => {
-      setPlayers(playerList);
+      setPlayers(data.players || []);
+      setGameMode(data.gameMode || gameMode);
     };
 
     // Register event listeners
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on('connect_error', () => onConnectionError());
-    socket.on('connectionError', onConnectionError);
-    socket.on('reconnecting', onReconnecting);
-    socket.on('gameStart', onGameStart);
-    socket.on('gameEnd', onGameEnd);
-    socket.on('gameStarted', onGameStarted);
-    socket.on('playerList', onPlayerList);
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('reconnect', handleReconnect);
+    socket.on('connect_error', handleError);
+    socket.on('error', handleError);
+    socket.on('gameState', handleGameState);
+    socket.on('playerJoined', handlePlayerJoined);
+    socket.on('gameStarted', handleGameStarted);
 
-    // Initial connection state
-    setIsConnected(socket.connected);
-
-    // Clean up all event listeners on unmount
+    // Clean up on unmount
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off('connect_error', onConnectionError);
-      socket.off('connectionError', onConnectionError);
-      socket.off('reconnecting', onReconnecting);
-      socket.off('gameStart', onGameStart);
-      socket.off('gameEnd', onGameEnd);
-      socket.off('gameStarted', onGameStarted);
-      socket.off('playerList', onPlayerList);
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('reconnect', handleReconnect);
+      socket.off('connect_error', handleError);
+      socket.off('error', handleError);
+      socket.off('gameState', handleGameState);
+      socket.off('playerJoined', handlePlayerJoined);
+      socket.off('gameStarted', handleGameStarted);
     };
-  }, [socket]);
+  }, [socket, gameMode]);
 
   // Show error message if not connected
   if (!isConnected) {
@@ -115,9 +117,16 @@ const App = ({ socket }) => {
     );
   }
 
+  console.log('Rendering App with gameStarted:', gameStarted);
+
   // Render the current game state
   return gameStarted ? (
-    <Game socket={socket} />
+    <Game 
+      socket={socket} 
+      playerName={playerName}
+      players={players}
+      gameMode={gameMode}
+    />
   ) : (
     <Lobby
       socket={socket}

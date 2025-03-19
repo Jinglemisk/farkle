@@ -14,145 +14,171 @@
  * - Win conditions
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import Dice from './Dice';
-import Scoreboard from './Scoreboard';
-import PlayerView from './PlayerView';
+import React, { useState, useEffect } from 'react';
 import '../styles/game.css';
 
 const Game = ({ socket, playerName, players, gameMode }) => {
   // Game state
-  const [gameData, setGameData] = useState({
-    currentPlayer: null,
-    dice: [],
+  const [gameState, setGameState] = useState({
+    currentTurn: null,
+    currentRoll: [],
     selectedDice: [],
     preBankedPoints: 0,
-    currentRoll: [],
-    isMyTurn: false,
-    roundStarted: false,
-    canRoll: false,
-    canBank: false,
-    hasHotDice: false
+    hasHotDice: false,
+    isMyTurn: false
   });
 
-  // Memoize event handlers to prevent recreating functions on each render
-  const handleGameState = useCallback((state) => {
-    setGameData(prev => ({
-      ...prev,
-      ...state,
-      // Determine if it's this player's turn
-      isMyTurn: state.currentPlayer && state.currentPlayer.id === socket.id
-    }));
-  }, [socket.id]);
-
-  // Handler for rolling dice
-  const handleRoll = useCallback(() => {
-    if (gameData.isMyTurn && gameData.canRoll) {
-      socket.emit('rollDice');
-    }
-  }, [socket, gameData.isMyTurn, gameData.canRoll]);
-
-  // Handler for selecting dice
-  const handleSelectDie = useCallback((index) => {
-    if (gameData.isMyTurn) {
-      socket.emit('selectDie', index);
-    }
-  }, [socket, gameData.isMyTurn]);
-
-  // Handler for banking points
-  const handleBank = useCallback(() => {
-    if (gameData.isMyTurn && gameData.canBank) {
-      socket.emit('bankPoints');
-    }
-  }, [socket, gameData.isMyTurn, gameData.canBank]);
-
-  // Listen for game state updates from the server
+  // Update game state when receiving server events
   useEffect(() => {
-    // Register event listener only once
+    const handleGameState = (state) => {
+      setGameState(prev => ({
+        ...prev,
+        ...state,
+        isMyTurn: state.currentTurn === socket.id
+      }));
+    };
+
+    const handleDiceRolled = (data) => {
+      setGameState(prev => ({
+        ...prev,
+        currentRoll: data.currentRoll,
+        hasHotDice: data.hasHotDice
+      }));
+    };
+
+    const handleDiceSelected = (data) => {
+      setGameState(prev => ({
+        ...prev,
+        currentRoll: data.currentRoll,
+        selectedDice: data.selectedDice,
+        preBankedPoints: data.preBankedPoints,
+        hasHotDice: data.hasHotDice
+      }));
+    };
+
+    const handlePointsBanked = (data) => {
+      setGameState(prev => ({
+        ...prev,
+        currentTurn: data.currentTurn,
+        isMyTurn: data.currentTurn === socket.id
+      }));
+    };
+
+    // Register event listeners
     socket.on('gameState', handleGameState);
+    socket.on('diceRolled', handleDiceRolled);
+    socket.on('diceSelected', handleDiceSelected);
+    socket.on('pointsBanked', handlePointsBanked);
 
     // Clean up on unmount
     return () => {
       socket.off('gameState', handleGameState);
+      socket.off('diceRolled', handleDiceRolled);
+      socket.off('diceSelected', handleDiceSelected);
+      socket.off('pointsBanked', handlePointsBanked);
     };
-  }, [socket, handleGameState]);
+  }, [socket]);
+
+  // Game action handlers
+  const handleRoll = () => {
+    if (gameState.isMyTurn) {
+      socket.emit('rollDice');
+    }
+  };
+
+  const handleSelectDie = (index) => {
+    if (gameState.isMyTurn) {
+      socket.emit('selectDie', { diceIndex: index });
+    }
+  };
+
+  const handleBank = () => {
+    if (gameState.isMyTurn && gameState.preBankedPoints > 0) {
+      socket.emit('bankPoints');
+    }
+  };
 
   return (
     <div className="game-container">
       <h1>Farkle - {gameMode} Mode</h1>
       
-      {/* Game table with players */}
-      <div className="game-table">
-        {players.map((player) => (
-          <PlayerView 
-            key={player.id} 
-            player={player} 
-            isCurrentPlayer={gameData.currentPlayer && gameData.currentPlayer.id === player.id}
-            isLocalPlayer={player.id === socket.id}
-          />
-        ))}
+      {/* Scoreboard */}
+      <div className="scoreboard">
+        <h2>Scoreboard</h2>
+        <div className="players-list">
+          {players.map(player => (
+            <div 
+              key={player.id} 
+              className={`player-score ${player.id === gameState.currentTurn ? 'current-turn' : ''}`}
+            >
+              {player.name}: {player.score}
+            </div>
+          ))}
+        </div>
       </div>
       
-      {/* Dice section */}
+      {/* Current player's dice */}
       <div className="dice-section">
-        <h2>Dice</h2>
+        <h2>Your Dice</h2>
         <div className="dice-container">
-          {gameData.currentRoll.map((die, index) => (
-            <Dice 
-              key={index} 
-              value={die.value} 
-              selected={die.selected}
+          {gameState.currentRoll.map((value, index) => (
+            <div 
+              key={index}
+              className="die"
               onClick={() => handleSelectDie(index)}
-              disabled={!gameData.isMyTurn || die.locked}
-            />
+            >
+              {value}
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Selected dice */}
+      <div className="selected-dice-section">
+        <h2>Selected Dice</h2>
+        <div className="dice-container">
+          {gameState.selectedDice.map((value, index) => (
+            <div 
+              key={index}
+              className="die selected"
+            >
+              {value}
+            </div>
           ))}
         </div>
       </div>
       
       {/* Pre-banked points */}
       <div className="pre-bank-section">
-        <h2>Pre-banked Points: {gameData.preBankedPoints}</h2>
-        <div className="selected-dice">
-          {gameData.selectedDice.map((die, index) => (
-            <Dice 
-              key={index} 
-              value={die.value} 
-              selected={true}
-              disabled={true}
-            />
-          ))}
-        </div>
+        <h2>Pre-banked Points: {gameState.preBankedPoints}</h2>
       </div>
       
       {/* Game controls */}
       <div className="game-controls">
         <button 
           onClick={handleRoll}
-          disabled={!gameData.isMyTurn || !gameData.canRoll}
-          className={`game-button ${gameData.isMyTurn && gameData.canRoll ? 'active' : ''}`}
+          disabled={!gameState.isMyTurn}
+          className={`game-button ${gameState.isMyTurn ? 'active' : ''}`}
         >
-          {gameData.hasHotDice ? "Roll (Hot Dice!)" : "Roll Dice"}
+          {gameState.hasHotDice ? "Roll (Hot Dice!)" : "Roll Dice"}
         </button>
         
         <button 
           onClick={handleBank}
-          disabled={!gameData.isMyTurn || !gameData.canBank}
-          className={`game-button ${gameData.isMyTurn && gameData.canBank ? 'active' : ''}`}
+          disabled={!gameState.isMyTurn || gameState.preBankedPoints === 0}
+          className={`game-button ${gameState.isMyTurn && gameState.preBankedPoints > 0 ? 'active' : ''}`}
         >
-          Bank {gameData.preBankedPoints} Points
+          Bank {gameState.preBankedPoints} Points
         </button>
       </div>
       
-      {/* Scoreboard */}
-      <Scoreboard players={players} />
-      
-      {/* Game status message */}
-      <div className="game-status">
-        {gameData.currentPlayer && (
+      {/* Turn indicator */}
+      <div className="turn-indicator">
+        {gameState.currentTurn && (
           <p>
-            {gameData.currentPlayer.id === socket.id 
+            {gameState.currentTurn === socket.id 
               ? "Your Turn" 
-              : `${gameData.currentPlayer.name}'s Turn`}
+              : `${players.find(p => p.id === gameState.currentTurn)?.name}'s Turn`}
           </p>
         )}
       </div>
