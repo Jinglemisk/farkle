@@ -8,13 +8,14 @@ interface DieProps {
   isKept: boolean;
   onClick: () => void;
   isScoring?: boolean;
+  showPlaceholder?: boolean;
 }
 
 const Dot: React.FC<{ position: string }> = ({ position }) => (
     <div className={`absolute w-3 h-3 md:w-4 md:h-4 bg-stone-800 rounded-full ${position}`}></div>
 );
 
-const DieFace: React.FC<{ value: DieValue }> = ({ value }) => {
+const DieFace: React.FC<{ value: DieValue; showPlaceholder?: boolean }> = ({ value, showPlaceholder }) => {
     const patterns: { [key in DieValue]: string[] } = {
         1: ['center'],
         2: ['top-left', 'bottom-right'],
@@ -34,6 +35,14 @@ const DieFace: React.FC<{ value: DieValue }> = ({ value }) => {
         'center': 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
     };
 
+    if (showPlaceholder) {
+        return (
+            <div className="relative w-full h-full p-2 flex items-center justify-center">
+                <span className="text-4xl md:text-5xl font-bold text-stone-800">?</span>
+            </div>
+        );
+    }
+
     return (
         <div className="relative w-full h-full p-2">
             {patterns[value].map(pos => <Dot key={pos} position={dotPositions[pos]} />)}
@@ -42,7 +51,7 @@ const DieFace: React.FC<{ value: DieValue }> = ({ value }) => {
 };
 
 
-const Die: React.FC<DieProps> = ({ value, isSelected, isKept, onClick, isScoring = true }) => {
+const Die: React.FC<DieProps> = ({ value, isSelected, isKept, onClick, isScoring = true, showPlaceholder = false }) => {
     const baseClasses = "w-16 h-16 md:w-20 md:h-20 bg-amber-50 rounded-lg shadow-md transition-all duration-200 flex items-center justify-center";
 
     const stateClasses = useMemo(() => {
@@ -62,7 +71,7 @@ const Die: React.FC<DieProps> = ({ value, isSelected, isKept, onClick, isScoring
 
     return (
         <div className={`${baseClasses} ${stateClasses}`} onClick={onClick}>
-            <DieFace value={value} />
+            <DieFace value={value} showPlaceholder={showPlaceholder} />
         </div>
     );
 };

@@ -31,6 +31,7 @@ const App: React.FC = () => {
 
   const renderDice = (diceSet: typeof dice, isKept: boolean = false) => {
     const allDiceValues = dice.map(d => d.value);
+    const showPlaceholder = !isKept && gameStatus === GameStatus.PlayerTurn;
 
     return diceSet.map(d => {
       const isScoring = isKept ? undefined : isScoringDie(d.value, allDiceValues);
@@ -42,6 +43,7 @@ const App: React.FC = () => {
           isSelected={d.isSelected}
           isKept={isKept}
           isScoring={isScoring}
+          showPlaceholder={showPlaceholder}
           onClick={() => !isKept && gameStatus === GameStatus.DiceRolled && handleSelectDie(d.id)}
         />
       );
