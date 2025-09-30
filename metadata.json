@@ -1,0 +1,5 @@
+{
+  "name": "Farkle Tavern Dice",
+  "description": "A single-player, medieval-tavern themed Farkle dice game. Roll the dice, score points, and try to reach 500 points before you Farkle!",
+  "requestFramePermissions": []
+}
