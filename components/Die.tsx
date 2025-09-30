@@ -7,6 +7,7 @@ interface DieProps {
   isSelected: boolean;
   isKept: boolean;
   onClick: () => void;
+  isScoring?: boolean;
 }
 
 const Dot: React.FC<{ position: string }> = ({ position }) => (
@@ -41,9 +42,9 @@ const DieFace: React.FC<{ value: DieValue }> = ({ value }) => {
 };
 
 
-const Die: React.FC<DieProps> = ({ value, isSelected, isKept, onClick }) => {
+const Die: React.FC<DieProps> = ({ value, isSelected, isKept, onClick, isScoring = true }) => {
     const baseClasses = "w-16 h-16 md:w-20 md:h-20 bg-amber-50 rounded-lg shadow-md transition-all duration-200 flex items-center justify-center";
-    
+
     const stateClasses = useMemo(() => {
         if (isKept) {
             return "border-4 border-lime-600 opacity-80 scale-90";
@@ -51,8 +52,12 @@ const Die: React.FC<DieProps> = ({ value, isSelected, isKept, onClick }) => {
         if (isSelected) {
             return "border-4 border-amber-400 transform -translate-y-2 scale-105 shadow-xl";
         }
-        return "border-2 border-amber-800 cursor-pointer hover:border-amber-400 hover:scale-105";
-    }, [isSelected, isKept]);
+        // Only show hover/cursor styles if die is scoring
+        if (isScoring) {
+            return "border-2 border-amber-800 cursor-pointer hover:border-amber-400 hover:scale-105";
+        }
+        return "border-2 border-amber-800 opacity-50";
+    }, [isSelected, isKept, isScoring]);
 
 
     return (

@@ -5,7 +5,7 @@ import Die from './components/Die';
 import Modal from './components/Modal';
 import { GameStatus } from './types';
 import { WINNING_SCORE } from './constants';
-import { calculateScore } from './utils/scoring';
+import { calculateScore, isScoringDie } from './utils/scoring';
 
 const App: React.FC = () => {
   const {
@@ -29,17 +29,24 @@ const App: React.FC = () => {
   const canRoll = gameStatus === GameStatus.PlayerTurn;
   const canBank = turnScore > 0 || (gameStatus === GameStatus.DiceRolled && canKeep);
 
-  const renderDice = (diceSet: typeof dice, isKept: boolean = false) => (
-    diceSet.map(d => (
-      <Die
-        key={d.id}
-        value={d.value}
-        isSelected={d.isSelected}
-        isKept={isKept}
-        onClick={() => !isKept && gameStatus === GameStatus.DiceRolled && handleSelectDie(d.id)}
-      />
-    ))
-  );
+  const renderDice = (diceSet: typeof dice, isKept: boolean = false) => {
+    const allDiceValues = dice.map(d => d.value);
+
+    return diceSet.map(d => {
+      const isScoring = isKept ? undefined : isScoringDie(d.value, allDiceValues);
+
+      return (
+        <Die
+          key={d.id}
+          value={d.value}
+          isSelected={d.isSelected}
+          isKept={isKept}
+          isScoring={isScoring}
+          onClick={() => !isKept && gameStatus === GameStatus.DiceRolled && handleSelectDie(d.id)}
+        />
+      );
+    });
+  };
 
   return (
     <div className="min-h-screen bg-stone-900 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] flex flex-col items-center justify-center p-4">
