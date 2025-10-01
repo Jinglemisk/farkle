@@ -1,6 +1,7 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useMultiplayerGame } from './hooks/useMultiplayerGame';
+import { useAudioManager } from './hooks/useAudioManager';
 import Die from './components/Die';
 import Modal from './components/Modal';
 import LobbyCreationScreen from './components/LobbyCreationScreen';
@@ -29,6 +30,8 @@ const App: React.FC = () => {
     winner,
   } = useMultiplayerGame();
 
+  const { playMusic, startTavernMusic, stopAllMusic, playSoundEffect } = useAudioManager();
+
   // Always call hooks - compute game values even if not on game screen
   const dice = gameState?.dice || [];
   const keptDice = gameState?.keptDice || [];
@@ -39,6 +42,29 @@ const App: React.FC = () => {
   const selectedDice = useMemo(() => dice.filter(d => d.isSelected), [dice]);
   const unselectedDice = useMemo(() => dice.filter(d => !d.isSelected), [dice]);
   const scoreForSelection = useMemo(() => calculateScore(selectedDice.map(d => d.value)), [selectedDice]);
+
+  // Music management based on screen
+  useEffect(() => {
+    if (screen === Screen.LobbyCreation || screen === Screen.Lobby) {
+      playMusic('lobby');
+    } else if (screen === Screen.Game) {
+      startTavernMusic();
+    }
+  }, [screen, playMusic, startTavernMusic]);
+
+  // Play winner music when game ends
+  useEffect(() => {
+    if (winner) {
+      playMusic('ending');
+    }
+  }, [winner, playMusic]);
+
+  // Play farkle sound effect
+  useEffect(() => {
+    if (gameState?.gameStatus === 'DICE_ROLLED' && dice.length > 0 && checkForFarkle(dice.map(d => d.value))) {
+      playSoundEffect('farkled');
+    }
+  }, [gameState?.gameStatus, dice, playSoundEffect]);
 
   // Render lobby creation screen
   if (screen === Screen.LobbyCreation) {
@@ -70,6 +96,7 @@ const App: React.FC = () => {
   const isFarkle = gameState.gameStatus === 'DICE_ROLLED' && dice.length > 0 && checkForFarkle(dice.map(d => d.value));
 
   const handleRollDice = () => {
+    playSoundEffect('diceroll');
     rollDice();
   };
 
