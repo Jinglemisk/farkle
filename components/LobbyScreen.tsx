@@ -12,107 +12,109 @@ const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, o
   const canStart = players.length >= 2 && isHost;
 
   return (
-    <div className="min-h-screen bg-stone-900 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-2xl mx-auto bg-stone-800/50 backdrop-blur-sm shadow-2xl rounded-lg border-4 border-amber-800 p-8">
-        <header className="text-center mb-6">
-          <h1 className="text-5xl font-bold text-amber-300 tracking-wider mb-2">FARKLE</h1>
-          <p className="text-amber-200 text-lg">Game Lobby</p>
+    <div className="min-h-screen bg-stone-900 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] flex items-center justify-center px-3 py-4 lg:px-6 lg:py-6 overflow-y-auto lg:overflow-hidden">
+      <div className="w-full max-w-5xl mx-auto bg-stone-800/60 backdrop-blur-sm shadow-2xl rounded-xl border-4 border-amber-800 p-4 sm:p-6 lg:p-7 lg:h-[88vh] flex flex-col gap-6 lg:overflow-hidden">
+        <header className="text-center lg:text-left">
+          <h1 className="text-4xl font-bold text-amber-300 tracking-[0.35em] mb-1">FARKLE</h1>
+          <p className="text-amber-200 text-sm sm:text-base">Game Lobby</p>
         </header>
 
-        {/* Lobby Code Display */}
-        <div className="bg-stone-900/70 border-4 border-amber-600 rounded-lg p-6 mb-6 text-center">
-          <p className="text-amber-200 text-sm mb-2">Lobby Code</p>
-          <div className="text-5xl font-bold text-amber-400 tracking-widest mb-2">
-            {lobbyCode}
-          </div>
-          <p className="text-stone-400 text-sm">Share this code with friends to join!</p>
-        </div>
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-6 flex-1 min-h-0">
+          <section className="flex flex-col gap-4 min-h-0">
+            <div className="bg-stone-900/70 border-4 border-amber-700 rounded-lg p-4 sm:p-5 text-center">
+              <p className="text-amber-200 text-xs uppercase tracking-[0.25em] mb-1">Lobby Code</p>
+              <div className="text-4xl sm:text-5xl font-bold text-amber-400 tracking-[0.4em] mb-2">
+                {lobbyCode}
+              </div>
+              <p className="text-stone-400 text-xs sm:text-sm">Share this code with friends to join!</p>
+            </div>
 
-        {/* Player Seats */}
-        <div className="mb-6">
-          <h2 className="text-amber-200 text-xl font-semibold mb-4 text-center">
-            Players ({players.length}/4)
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            {[0, 1, 2, 3].map((seatIndex) => {
-              const player = players[seatIndex];
-              const isEmpty = !player;
+            <div className="flex-1 min-h-0 flex flex-col gap-3">
+              <h2 className="text-amber-200 text-lg font-semibold text-center">Players ({players.length}/4)</h2>
+              <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
+                {[0, 1, 2, 3].map((seatIndex) => {
+                  const player = players[seatIndex];
+                  const isEmpty = !player;
 
-              return (
-                <div
-                  key={seatIndex}
-                  className={`
-                    ${isEmpty ? 'bg-stone-700/50 border-stone-600' : 'bg-green-900/50 border-amber-600'}
-                    border-4 rounded-lg p-4 min-h-[80px] flex items-center justify-center
-                    transition-all duration-200
-                  `}
-                >
-                  {isEmpty ? (
-                    <div className="text-center">
-                      <p className="text-stone-400 text-sm">Seat {seatIndex + 1}</p>
-                      <p className="text-stone-500 text-xs">Waiting...</p>
+                  return (
+                    <div
+                      key={seatIndex}
+                      className={`
+                        ${isEmpty ? 'bg-stone-700/50 border-stone-600/70' : 'bg-green-900/50 border-amber-600'}
+                        border-4 rounded-lg p-3 flex items-center justify-center text-center transition-all duration-200
+                      `}
+                    >
+                      {isEmpty ? (
+                        <div>
+                          <p className="text-stone-400 text-sm">Seat {seatIndex + 1}</p>
+                          <p className="text-stone-500 text-xs">Waiting...</p>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 w-full">
+                          <div className="bg-stone-900 border-2 border-amber-600 rounded-lg p-1 flex-shrink-0">
+                            <img
+                              src={`/images/farkle-avatar-${player.avatar}.png`}
+                              alt={`${player.nickname}'s avatar`}
+                              className="w-10 h-10 object-cover rounded"
+                            />
+                          </div>
+                          <div className="text-left flex-1 min-w-0">
+                            <p className="text-amber-200 font-semibold text-base truncate">
+                              {player.nickname}
+                            </p>
+                            {player.id === players[0]?.id && (
+                              <span className="inline-block bg-amber-600 text-stone-900 text-[10px] font-bold px-2 py-0.5 rounded mt-1 uppercase tracking-wide">
+                                Host
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-3 w-full">
-                      <div className="bg-stone-900 border-2 border-amber-600 rounded-lg p-1 flex-shrink-0">
-                        <img
-                          src={`/images/farkle-avatar-${player.avatar}.png`}
-                          alt={`${player.nickname}'s avatar`}
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                      </div>
-                      <div className="text-left flex-1 min-w-0">
-                        <p className="text-amber-200 font-semibold text-lg truncate">
-                          {player.nickname}
-                        </p>
-                        {player.id === players[0]?.id && (
-                          <span className="inline-block bg-amber-600 text-stone-900 text-xs font-bold px-2 py-1 rounded mt-1">
-                            HOST
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
 
-        {/* Game Info */}
-        <div className="bg-stone-900/50 border-2 border-stone-700 rounded-lg p-4 mb-6">
-          <p className="text-amber-200 text-sm text-center">
-            {players.length < 2
-              ? 'Waiting for at least 2 players to start...'
-              : isHost
-              ? 'Ready to start! Click the button below.'
-              : 'Waiting for host to start the game...'}
-          </p>
-        </div>
+          <aside className="bg-stone-900/60 border-4 border-amber-700 rounded-lg p-4 sm:p-5 flex flex-col gap-4 min-h-0">
+            <div className="bg-stone-900/80 border border-amber-600/50 rounded-lg p-4 text-center">
+              <p className="text-amber-200 text-sm font-semibold">
+                {players.length < 2
+                  ? 'Waiting for at least 2 players to start...'
+                  : isHost
+                  ? 'Ready to start!'
+                  : 'Waiting for the host to begin.'}
+              </p>
+            </div>
 
-        {/* Start Button */}
-        <button
-          onClick={onStartGame}
-          disabled={!canStart}
-          className="w-full bg-amber-600 hover:bg-amber-500 disabled:bg-stone-600 text-stone-900 disabled:text-stone-400 font-bold py-4 px-8 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-stone-600"
-        >
-          {isHost
-            ? canStart
-              ? 'Start Game'
-              : `Need ${2 - players.length} more player${2 - players.length === 1 ? '' : 's'}`
-            : 'Waiting for Host'}
-        </button>
+            <button
+              onClick={onStartGame}
+              disabled={!canStart}
+              className="w-full bg-amber-600 hover:bg-amber-500 disabled:bg-stone-600 text-stone-900 disabled:text-stone-400 font-bold py-2.5 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:cursor-not-allowed disabled:scale-100"
+            >
+              {isHost
+                ? canStart
+                  ? 'Start Game'
+                  : `Need ${2 - players.length} more player${2 - players.length === 1 ? '' : 's'}`
+                : 'Waiting for Host'}
+            </button>
 
-        {/* Game Rules Reminder */}
-        <div className="mt-6 pt-6 border-t-2 border-stone-700">
-          <h3 className="text-amber-200 font-semibold mb-2 text-center">Quick Rules:</h3>
-          <ul className="text-stone-300 text-sm space-y-1">
-            <li>• Take turns rolling dice to score points</li>
-            <li>• 1s = 100 points, 5s = 50 points</li>
-            <li>• Three of a kind = face value × 100 (except 1s = 1000)</li>
-            <li>• Bank your score or risk it all for more points</li>
-            <li>• First player to reach 500 points wins!</li>
-          </ul>
+            <div className="bg-stone-900/80 border border-stone-700 rounded-lg p-4 text-sm text-stone-200">
+              <h3 className="text-amber-200 font-semibold mb-2 text-center">Quick Rules</h3>
+              <ul className="space-y-1 text-xs sm:text-sm">
+                <li>• Take turns rolling to collect scoring dice.</li>
+                <li>• 1s = 100 points, 5s = 50 points.</li>
+                <li>• Three of a kind scores face value × 100 (1s = 1000).</li>
+                <li>• Bank points before you Farkle with no scorers.</li>
+                <li>• First player to reach 500 points wins!</li>
+              </ul>
+            </div>
+
+            <div className="mt-auto text-center text-xs text-stone-400">
+              <p>Tip: Share the lobby code while waiting so everyone arrives together.</p>
+            </div>
+          </aside>
         </div>
       </div>
     </div>
