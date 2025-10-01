@@ -44,6 +44,7 @@ const App: React.FC = () => {
   const selectedDice = useMemo(() => dice.filter(d => d.isSelected), [dice]);
   const unselectedDice = useMemo(() => dice.filter(d => !d.isSelected), [dice]);
   const scoreForSelection = useMemo(() => calculateScore(selectedDice.map(d => d.value)), [selectedDice]);
+  const scoreboardSlots = useMemo(() => Array.from({ length: 4 }, (_, index) => players[index] || null), [players]);
   const scoringExamples = useMemo(
     () => [
       {
@@ -176,8 +177,6 @@ const App: React.FC = () => {
       );
     });
   };
-
-  const scoreboardSlots = useMemo(() => Array.from({ length: 4 }, (_, index) => players[index] || null), [players]);
 
   const renderExampleDice = (values: DieValue[], keyPrefix: string) => (
     <div className="flex justify-end flex-wrap gap-1 pointer-events-none">
