@@ -1,12 +1,12 @@
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useMultiplayerGame } from './hooks/useMultiplayerGame';
 import { useAudioManager } from './hooks/useAudioManager';
 import Die from './components/Die';
 import Modal from './components/Modal';
 import LobbyCreationScreen from './components/LobbyCreationScreen';
 import LobbyScreen from './components/LobbyScreen';
-import { GameStatus, Screen } from './types';
+import { GameStatus, Screen, DieValue } from './types';
 import { GAME_MODES } from './constants';
 import { calculateScore, isScoringDie, checkForFarkle } from './utils/scoring';
 
@@ -39,10 +39,40 @@ const App: React.FC = () => {
   const turnScore = gameState?.turnScore || 0;
   const myTurn = isMyTurn();
   const currentPlayer = getCurrentPlayer();
+  const [infoTab, setInfoTab] = useState<'scoreboard' | 'help'>('scoreboard');
 
   const selectedDice = useMemo(() => dice.filter(d => d.isSelected), [dice]);
   const unselectedDice = useMemo(() => dice.filter(d => !d.isSelected), [dice]);
   const scoreForSelection = useMemo(() => calculateScore(selectedDice.map(d => d.value)), [selectedDice]);
+  const scoringExamples = useMemo(
+    () => [
+      {
+        id: 'single-ones',
+        title: 'Single 1s',
+        summary: '100 pts each kept 1.',
+        dice: [1] as DieValue[],
+      },
+      {
+        id: 'single-fives',
+        title: 'Single 5s',
+        summary: '50 pts each kept 5.',
+        dice: [5] as DieValue[],
+      },
+      {
+        id: 'three-of-kind',
+        title: 'Three of a Kind',
+        summary: 'Value × 100 (1s = 1000).',
+        dice: [1, 1, 1] as DieValue[],
+      },
+      {
+        id: 'straight',
+        title: 'Straight 1-6',
+        summary: 'All six dice = 1500 pts.',
+        dice: [1, 2, 3, 4, 5, 6] as DieValue[],
+      },
+    ],
+    []
+  );
 
   // Music management based on screen
   useEffect(() => {
@@ -146,6 +176,24 @@ const App: React.FC = () => {
       );
     });
   };
+
+  const renderExampleDice = (values: DieValue[], keyPrefix: string) => (
+    <div className="flex justify-end flex-wrap gap-1 pointer-events-none">
+      {values.map((value, index) => (
+        <div key={`${keyPrefix}-${index}`} className="pointer-events-none w-8 h-8">
+          <Die
+            value={value}
+            isSelected={false}
+            isKept={false}
+            isScoring
+            showPlaceholder={false}
+            onClick={() => {}}
+            size="sm"
+          />
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-stone-900 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] flex items-center justify-center px-3 py-4 lg:px-6 lg:py-6 overflow-y-auto lg:overflow-hidden">
@@ -258,27 +306,69 @@ const App: React.FC = () => {
           </section>
 
           <aside className="bg-stone-900/70 border-4 border-amber-700 rounded-lg p-4 flex flex-col gap-4 min-h-0">
-            <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
-              {players.map((player) => {
-                const isCurrentPlayer = gameState.currentPlayerTurn === player.id;
-                return (
-                  <div
-                    key={player.id}
-                    className={`bg-stone-900/60 border-2 rounded-lg p-3 text-center transition-all flex flex-col items-center gap-2 ${isCurrentPlayer ? 'border-lime-500 shadow-lg shadow-lime-500/40' : 'border-amber-600/70'}`}
-                  >
-                    <div className={`bg-stone-800 border rounded-md p-1 transition-transform ${isCurrentPlayer ? 'border-lime-500 scale-105' : 'border-amber-600/80'}`}>
-                      <img
-                        src={`/images/farkle-avatar-${player.avatar}.png`}
-                        alt={`${player.nickname}'s avatar`}
-                        className="w-10 h-10 object-cover rounded"
-                      />
+            <div className="bg-stone-900/80 border border-amber-700 rounded-lg p-1 flex items-center gap-1">
+              <button
+                onClick={() => setInfoTab('scoreboard')}
+                className={`flex-1 py-2 rounded-md text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
+                  infoTab === 'scoreboard'
+                    ? 'bg-amber-500 text-stone-900'
+                    : 'text-amber-200 hover:bg-amber-500/20'
+                }`}
+              >
+                Scoreboard
+              </button>
+              <button
+                onClick={() => setInfoTab('help')}
+                className={`flex-1 py-2 rounded-md text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
+                  infoTab === 'help'
+                    ? 'bg-amber-500 text-stone-900'
+                    : 'text-amber-200 hover:bg-amber-500/20'
+                }`}
+              >
+                Help
+              </button>
+            </div>
+
+            <div className="flex-1 min-h-0 w-full">
+              {infoTab === 'scoreboard' ? (
+                <div className="grid grid-cols-2 gap-3 h-full">
+                  {players.map((player) => {
+                    const isCurrentPlayer = gameState.currentPlayerTurn === player.id;
+                    return (
+                      <div
+                        key={player.id}
+                        className={`bg-stone-900/60 border-2 rounded-lg p-3 text-center transition-all flex flex-col items-center gap-2 ${isCurrentPlayer ? 'border-lime-500 shadow-lg shadow-lime-500/40' : 'border-amber-600/70'}`}
+                      >
+                        <div className={`bg-stone-800 border rounded-md p-1 transition-transform ${isCurrentPlayer ? 'border-lime-500 scale-105' : 'border-amber-600/80'}`}>
+                          <img
+                            src={`/images/farkle-avatar-${player.avatar}.png`}
+                            alt={`${player.nickname}'s avatar`}
+                            className="w-10 h-10 object-cover rounded"
+                          />
+                        </div>
+                        <p className="text-amber-200 text-sm font-semibold truncate w-full">{player.nickname}</p>
+                        <p className="text-2xl font-bold text-white">{player.score}</p>
+                        {isCurrentPlayer && <p className="text-lime-400 text-xs uppercase tracking-wide">Playing</p>}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 h-full">
+                  {scoringExamples.map(example => (
+                    <div
+                      key={example.id}
+                      className="bg-stone-900/70 border border-amber-700/60 rounded-lg px-3 py-2 flex items-center justify-between gap-3"
+                    >
+                      <div className="text-left">
+                        <p className="text-amber-200 text-xs font-semibold uppercase tracking-wide">{example.title}</p>
+                        <p className="text-stone-300 text-xs">{example.summary}</p>
+                      </div>
+                      {renderExampleDice(example.dice, example.id)}
                     </div>
-                    <p className="text-amber-200 text-sm font-semibold truncate w-full">{player.nickname}</p>
-                    <p className="text-2xl font-bold text-white">{player.score}</p>
-                    {isCurrentPlayer && <p className="text-lime-400 text-xs uppercase tracking-wide">Playing</p>}
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="bg-stone-900/80 border border-amber-700 rounded-lg px-4 py-3 text-center shadow-inner">
