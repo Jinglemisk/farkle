@@ -215,19 +215,19 @@ const App: React.FC = () => {
         />
       )}
 
-      <div className="w-full max-w-6xl mx-auto bg-stone-800/60 backdrop-blur-sm shadow-2xl rounded-xl border-4 border-amber-800 p-4 sm:p-6 lg:p-7 lg:h-[88vh] flex flex-col gap-4 lg:gap-6 lg:overflow-hidden">
-        <header className="text-center lg:text-left">
-          <h1 className="text-4xl font-bold text-amber-300 tracking-[0.35em]">FARKLE</h1>
-          <p className="text-amber-200 text-sm sm:text-base">{GAME_MODES[gameMode].label} Mode - Score {GAME_MODES[gameMode].winningScore} points to win!</p>
-          {currentPlayer && (
-            <div className={`mt-2 text-base font-semibold ${myTurn ? 'text-lime-400' : 'text-amber-200'}`}>
-              {myTurn ? 'YOUR TURN' : `${currentPlayer.nickname}'s Turn`}
-            </div>
-          )}
-        </header>
+      <div className="w-full max-w-6xl mx-auto bg-stone-800/60 backdrop-blur-sm shadow-2xl rounded-xl border-4 border-amber-800 p-4 sm:p-6 lg:p-7 lg:h-[88vh] lg:overflow-hidden">
+        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:grid-rows-[auto_minmax(0,1fr)] lg:gap-x-6 lg:gap-y-6 lg:h-full">
+          <header className="text-center lg:text-left lg:col-start-1 lg:row-start-1">
+            <h1 className="text-4xl font-bold text-amber-300 tracking-[0.35em]">FARKLE</h1>
+            <p className="text-amber-200 text-sm sm:text-base">{GAME_MODES[gameMode].label} Mode - Score {GAME_MODES[gameMode].winningScore} points to win!</p>
+            {currentPlayer && (
+              <div className={`mt-2 text-base font-semibold ${myTurn ? 'text-lime-400' : 'text-amber-200'}`}>
+                {myTurn ? 'YOUR TURN' : `${currentPlayer.nickname}'s Turn`}
+              </div>
+            )}
+          </header>
 
-        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6 flex-1 min-h-0">
-          <section className="flex flex-col gap-4 lg:flex-1 min-h-0">
+          <section className="flex flex-col gap-4 lg:flex-1 min-h-0 lg:col-start-1 lg:row-start-2">
             <div className="bg-green-900/70 border-4 border-amber-600 rounded-lg p-4 sm:p-5 flex-1 min-h-0 flex flex-col gap-4 shadow-lg">
               <div>
                 <h3 className="text-center text-amber-200 text-sm font-semibold mb-2">Kept Dice ({keptDice.length})</h3>
@@ -301,11 +301,11 @@ const App: React.FC = () => {
                     Bank Score
                   </button>
                 </>
-              )}
-            </div>
-          </section>
+            )}
+          </div>
+        </section>
 
-          <aside className="bg-stone-900/70 border-4 border-amber-700 rounded-lg p-4 flex flex-col gap-4 min-h-0">
+          <aside className="bg-stone-900/70 border-4 border-amber-700 rounded-lg p-4 flex flex-col gap-4 min-h-0 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:h-full">
             <div className="bg-stone-900/80 border border-amber-700 rounded-lg p-1 flex items-center gap-1">
               <button
                 onClick={() => setInfoTab('scoreboard')}
@@ -331,30 +331,30 @@ const App: React.FC = () => {
 
             <div className="flex-1 min-h-0 w-full">
               {infoTab === 'scoreboard' ? (
-                <div className="grid grid-cols-2 gap-3 h-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3 items-start">
                   {players.map((player) => {
                     const isCurrentPlayer = gameState.currentPlayerTurn === player.id;
                     return (
                       <div
                         key={player.id}
-                        className={`bg-stone-900/60 border-2 rounded-lg p-3 text-center transition-all flex flex-col items-center gap-2 ${isCurrentPlayer ? 'border-lime-500 shadow-lg shadow-lime-500/40' : 'border-amber-600/70'}`}
+                        className={`bg-stone-900/60 border-2 rounded-lg p-2 text-center transition-all flex flex-col items-center gap-1.5 ${isCurrentPlayer ? 'border-lime-500 shadow-lg shadow-lime-500/40' : 'border-amber-600/70'}`}
                       >
                         <div className={`bg-stone-800 border rounded-md p-1 transition-transform ${isCurrentPlayer ? 'border-lime-500 scale-105' : 'border-amber-600/80'}`}>
                           <img
                             src={`/images/farkle-avatar-${player.avatar}.png`}
                             alt={`${player.nickname}'s avatar`}
-                            className="w-10 h-10 object-cover rounded"
+                            className="w-8 h-8 object-cover rounded"
                           />
                         </div>
-                        <p className="text-amber-200 text-sm font-semibold truncate w-full">{player.nickname}</p>
-                        <p className="text-2xl font-bold text-white">{player.score}</p>
-                        {isCurrentPlayer && <p className="text-lime-400 text-xs uppercase tracking-wide">Playing</p>}
+                        <p className="text-amber-200 text-xs font-semibold truncate w-full">{player.nickname}</p>
+                        <p className="text-xl font-bold text-white">{player.score}</p>
+                        {isCurrentPlayer && <p className="text-lime-400 text-[10px] uppercase tracking-wide">Playing</p>}
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="flex flex-col gap-2 h-full">
+                <div className="flex flex-col gap-2">
                   {scoringExamples.map(example => (
                     <div
                       key={example.id}
