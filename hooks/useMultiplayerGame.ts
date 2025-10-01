@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { Player, MultiplayerGameState, Screen } from '../types';
+import { Player, MultiplayerGameState, Screen, GameMode } from '../types';
 
 // Use environment variable for server URL, fallback to localhost for development
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
@@ -19,6 +19,7 @@ export const useMultiplayerGame = () => {
   // Game state
   const [gameState, setGameState] = useState<MultiplayerGameState | null>(null);
   const [winner, setWinner] = useState<Player | null>(null);
+  const [gameMode, setGameMode] = useState<GameMode>('standard');
 
   const socketRef = useRef<Socket | null>(null);
 
@@ -45,9 +46,12 @@ export const useMultiplayerGame = () => {
       setIsHost(newSocket.id === host);
     });
 
-    newSocket.on('gameStarted', ({ players: updatedPlayers, gameState: newGameState }) => {
+    newSocket.on('gameStarted', ({ players: updatedPlayers, gameState: newGameState, gameMode: mode }) => {
       setPlayers(updatedPlayers);
       setGameState(newGameState);
+      if (mode) {
+        setGameMode(mode);
+      }
       setScreen(Screen.Game);
     });
 
@@ -90,6 +94,7 @@ export const useMultiplayerGame = () => {
     setPlayers([]);
     setGameState(null);
     setWinner(null);
+    setGameMode('standard');
     setError('');
   }, []);
 
@@ -100,9 +105,9 @@ export const useMultiplayerGame = () => {
     socket.emit('createOrJoinLobby', { nickname, avatar, lobbyCode: code });
   }, [socket]);
 
-  const startGame = useCallback(() => {
+  const startGame = useCallback((mode: GameMode) => {
     if (!socket) return;
-    socket.emit('startGame');
+    socket.emit('startGame', { gameMode: mode });
   }, [socket]);
 
   const rollDice = useCallback(() => {
@@ -153,6 +158,7 @@ export const useMultiplayerGame = () => {
 
     // Game
     gameState,
+    gameMode,
     currentPlayerNickname,
     rollDice,
     selectDie,

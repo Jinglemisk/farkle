@@ -15,6 +15,8 @@ export enum GameStatus {
   GameOverFarkle = 'GAME_OVER_FARKLE',
 }
 
+export type GameMode = 'rush' | 'standard' | 'marathon';
+
 // Multiplayer types
 export interface Player {
   id: string;
@@ -39,6 +41,7 @@ export interface Lobby {
   players: Player[];
   gameState: MultiplayerGameState | null;
   isGameStarted: boolean;
+  gameMode: GameMode;
 }
 
 export enum Screen {

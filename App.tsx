@@ -7,7 +7,7 @@ import Modal from './components/Modal';
 import LobbyCreationScreen from './components/LobbyCreationScreen';
 import LobbyScreen from './components/LobbyScreen';
 import { GameStatus, Screen } from './types';
-import { WINNING_SCORE } from './constants';
+import { GAME_MODES } from './constants';
 import { calculateScore, isScoringDie, checkForFarkle } from './utils/scoring';
 
 const App: React.FC = () => {
@@ -20,6 +20,7 @@ const App: React.FC = () => {
     createOrJoinLobby,
     startGame,
     gameState,
+    gameMode,
     rollDice,
     selectDie,
     keepDice,
@@ -169,7 +170,7 @@ const App: React.FC = () => {
       <div className="w-full max-w-6xl mx-auto bg-stone-800/60 backdrop-blur-sm shadow-2xl rounded-xl border-4 border-amber-800 p-4 sm:p-6 lg:p-7 lg:h-[88vh] flex flex-col gap-4 lg:gap-6 lg:overflow-hidden">
         <header className="text-center lg:text-left">
           <h1 className="text-4xl font-bold text-amber-300 tracking-[0.35em]">FARKLE</h1>
-          <p className="text-amber-200 text-sm sm:text-base">Score {WINNING_SCORE} points to win!</p>
+          <p className="text-amber-200 text-sm sm:text-base">{GAME_MODES[gameMode].label} Mode - Score {GAME_MODES[gameMode].winningScore} points to win!</p>
           {currentPlayer && (
             <div className={`mt-2 text-base font-semibold ${myTurn ? 'text-lime-400' : 'text-amber-200'}`}>
               {myTurn ? 'YOUR TURN' : `${currentPlayer.nickname}'s Turn`}
@@ -189,17 +190,26 @@ const App: React.FC = () => {
 
               <div className="flex-1 min-h-0 flex flex-col">
                 <h3 className="text-center text-amber-200 text-sm font-semibold mb-2">Current Roll ({dice.length})</h3>
-                <div className="flex flex-wrap justify-center items-center gap-4 flex-1 min-h-0">
+                <div className="flex flex-col gap-3 flex-1 min-h-0 justify-center">
                   {dice.length > 0 ? (
                     <>
-                      {renderDice(unselectedDice)}
-                      {selectedDice.length > 0 && <div className="hidden sm:block border-l-2 border-amber-400 h-10 sm:h-12 mx-1 sm:mx-2"></div>}
-                      {renderDice(selectedDice)}
+                      <div className="flex flex-wrap justify-center items-center gap-3 min-h-[68px]">
+                        {renderDice(unselectedDice)}
+                      </div>
+                      {selectedDice.length > 0 && (
+                        <div className="flex flex-col gap-2 items-center">
+                          <div className="h-px w-32 bg-amber-500/50" />
+                          <p className="text-amber-200 text-xs uppercase tracking-[0.25em]">Selected</p>
+                          <div className="flex flex-wrap justify-center items-center gap-3 min-h-[68px] mt-2">
+                            {renderDice(selectedDice)}
+                          </div>
+                        </div>
+                      )}
                     </>
                   ) : keptDice.length > 0 && keptDice.length < 6 ? (
-                    <p className="text-stone-300 text-sm">Roll the remaining dice!</p>
+                    <p className="text-stone-300 text-sm text-center">Roll the remaining dice!</p>
                   ) : (
-                    <p className="text-stone-300 text-sm">Ready to roll!</p>
+                    <p className="text-stone-300 text-sm text-center">Ready to roll!</p>
                   )}
                 </div>
               </div>

@@ -1,14 +1,16 @@
-import React from 'react';
-import { Player } from '../types';
+import React, { useState } from 'react';
+import { Player, GameMode } from '../types';
+import { GAME_MODES } from '../constants';
 
 interface LobbyScreenProps {
   lobbyCode: string;
   players: Player[];
   isHost: boolean;
-  onStartGame: () => void;
+  onStartGame: (gameMode: GameMode) => void;
 }
 
 const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, onStartGame }) => {
+  const [gameMode, setGameMode] = useState<GameMode>('standard');
   const canStart = players.length >= 2 && isHost;
 
   return (
@@ -78,6 +80,26 @@ const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, o
           </section>
 
           <aside className="bg-stone-900/60 border-4 border-amber-700 rounded-lg p-4 sm:p-5 flex flex-col gap-4 min-h-0">
+            <div className="bg-stone-900/80 border border-amber-600/50 rounded-lg p-4">
+              <h3 className="text-amber-200 font-semibold mb-3 text-center">Game Mode</h3>
+              <div className="flex flex-col gap-2">
+                {(Object.keys(GAME_MODES) as GameMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setGameMode(mode)}
+                    disabled={!isHost}
+                    className={`px-4 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                      gameMode === mode
+                        ? 'bg-amber-600 text-stone-900 shadow-md'
+                        : 'bg-stone-700/50 text-stone-300 hover:bg-stone-700'
+                    } ${!isHost ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                  >
+                    {GAME_MODES[mode].label} ({GAME_MODES[mode].winningScore} pts)
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="bg-stone-900/80 border border-amber-600/50 rounded-lg p-4 text-center">
               <p className="text-amber-200 text-sm font-semibold">
                 {players.length < 2
@@ -89,7 +111,7 @@ const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, o
             </div>
 
             <button
-              onClick={onStartGame}
+              onClick={() => onStartGame(gameMode)}
               disabled={!canStart}
               className="w-full bg-amber-600 hover:bg-amber-500 disabled:bg-stone-600 text-stone-900 disabled:text-stone-400 font-bold py-2.5 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:cursor-not-allowed disabled:scale-100"
             >
@@ -107,7 +129,7 @@ const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, o
                 <li>• 1s = 100 points, 5s = 50 points.</li>
                 <li>• Three of a kind scores face value × 100 (1s = 1000).</li>
                 <li>• Bank points before you Farkle with no scorers.</li>
-                <li>• First player to reach 500 points wins!</li>
+                <li>• First player to reach {GAME_MODES[gameMode].winningScore} points wins!</li>
               </ul>
             </div>
 

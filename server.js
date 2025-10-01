@@ -25,6 +25,17 @@ const io = new Server(httpServer, {
 const lobbies = new Map(); // lobbyCode -> lobby data
 const playerToLobby = new Map(); // socketId -> lobbyCode
 
+// Game mode configurations
+const GAME_MODES = {
+  rush: { label: 'Rush', winningScore: 1000 },
+  standard: { label: 'Standard', winningScore: 2000 },
+  marathon: { label: 'Marathon', winningScore: 4000 },
+};
+
+function getWinningScore(gameMode) {
+  return GAME_MODES[gameMode]?.winningScore || 2000;
+}
+
 // Generate 6-letter alphanumeric code
 function generateLobbyCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -61,7 +72,8 @@ io.on('connection', (socket) => {
         host: socket.id,
         players: [],
         gameState: null,
-        isGameStarted: false
+        isGameStarted: false,
+        gameMode: 'standard'
       });
     }
 
@@ -114,7 +126,7 @@ io.on('connection', (socket) => {
   });
 
   // Start game
-  socket.on('startGame', () => {
+  socket.on('startGame', ({ gameMode }) => {
     const code = playerToLobby.get(socket.id);
     const lobby = lobbies.get(code);
 
@@ -132,6 +144,11 @@ io.on('connection', (socket) => {
       return;
     }
 
+    // Set game mode
+    if (gameMode) {
+      lobby.gameMode = gameMode;
+    }
+
     // Initialize game state
     lobby.isGameStarted = true;
     lobby.gameState = {
@@ -146,10 +163,11 @@ io.on('connection', (socket) => {
     // Notify all players that game is starting
     io.to(code).emit('gameStarted', {
       players: lobby.players,
-      gameState: lobby.gameState
+      gameState: lobby.gameState,
+      gameMode: lobby.gameMode
     });
 
-    console.log(`Game started in lobby ${code}`);
+    console.log(`Game started in lobby ${code} with mode ${lobby.gameMode}`);
   });
 
   // Handle game actions
@@ -229,8 +247,9 @@ io.on('connection', (socket) => {
       player.score += finalScore;
     }
 
-    // Check for winner
-    if (player.score >= 500) {
+    // Check for winner using dynamic winning score
+    const winningScore = getWinningScore(lobby.gameMode);
+    if (player.score >= winningScore) {
       io.to(code).emit('gameOver', {
         winner: player,
         players: lobby.players
