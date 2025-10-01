@@ -79,16 +79,16 @@ const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, o
             </div>
           </section>
 
-          <aside className="bg-stone-900/60 border-4 border-amber-700 rounded-lg p-4 sm:p-5 flex flex-col gap-4 min-h-0">
-            <div className="bg-stone-900/80 border border-amber-600/50 rounded-lg p-4">
-              <h3 className="text-amber-200 font-semibold mb-3 text-center">Game Mode</h3>
-              <div className="flex flex-col gap-2">
+          <aside className="bg-stone-900/60 border-4 border-amber-700 rounded-lg p-4 sm:p-5 flex flex-col gap-3 min-h-0">
+            <div className="bg-stone-900/80 border border-amber-600/50 rounded-lg p-3">
+              <h3 className="text-amber-200 font-semibold mb-2 text-center text-sm">Game Mode</h3>
+              <div className="flex flex-col gap-1.5">
                 {(Object.keys(GAME_MODES) as GameMode[]).map((mode) => (
                   <button
                     key={mode}
                     onClick={() => setGameMode(mode)}
                     disabled={!isHost}
-                    className={`px-4 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                    className={`px-3.5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all ${
                       gameMode === mode
                         ? 'bg-amber-600 text-stone-900 shadow-md'
                         : 'bg-stone-700/50 text-stone-300 hover:bg-stone-700'
@@ -100,20 +100,10 @@ const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, o
               </div>
             </div>
 
-            <div className="bg-stone-900/80 border border-amber-600/50 rounded-lg p-4 text-center">
-              <p className="text-amber-200 text-sm font-semibold">
-                {players.length < 2
-                  ? 'Waiting for at least 2 players to start...'
-                  : isHost
-                  ? 'Ready to start!'
-                  : 'Waiting for the host to begin.'}
-              </p>
-            </div>
-
             <button
               onClick={() => onStartGame(gameMode)}
               disabled={!canStart}
-              className="w-full bg-amber-600 hover:bg-amber-500 disabled:bg-stone-600 text-stone-900 disabled:text-stone-400 font-bold py-2.5 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:cursor-not-allowed disabled:scale-100"
+              className="w-full bg-amber-600 hover:bg-amber-500 disabled:bg-stone-600 text-stone-900 disabled:text-stone-400 font-bold py-2 px-5 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:cursor-not-allowed disabled:scale-100"
             >
               {isHost
                 ? canStart
@@ -122,20 +112,18 @@ const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, o
                 : 'Waiting for Host'}
             </button>
 
-            <div className="bg-stone-900/80 border border-stone-700 rounded-lg p-4 text-sm text-stone-200">
-              <h3 className="text-amber-200 font-semibold mb-2 text-center">Quick Rules</h3>
-              <ul className="space-y-1 text-xs sm:text-sm">
-                <li>• Take turns rolling to collect scoring dice.</li>
-                <li>• 1s = 100 points, 5s = 50 points.</li>
-                <li>• Three of a kind scores face value × 100 (1s = 1000).</li>
-                <li>• Bank points before you Farkle with no scorers.</li>
-                <li>• First player to reach {GAME_MODES[gameMode].winningScore} points wins!</li>
+            <div className="bg-stone-900/80 border border-stone-700 rounded-lg p-3 text-xs text-stone-200">
+              <h3 className="text-amber-200 font-semibold mb-1.5 text-center text-sm">Quick Rules</h3>
+              <ul className="list-disc list-inside space-y-1 leading-tight">
+                <li>Take turns rolling to collect scoring dice.</li>
+                <li>1s = 100 points, 5s = 50 points.</li>
+                <li>Three of a kind scores face value × 100 (1s = 1000).</li>
+                <li>Bank points before you Farkle with no scorers.</li>
+                <li>First player to reach {GAME_MODES[gameMode].winningScore} points wins!</li>
               </ul>
             </div>
 
-            <div className="mt-auto text-center text-xs text-stone-400">
-              <p>Tip: Share the lobby code while waiting so everyone arrives together.</p>
-            </div>
+            <div className="mt-auto" />
           </aside>
         </div>
       </div>
