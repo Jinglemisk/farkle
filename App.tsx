@@ -177,6 +177,8 @@ const App: React.FC = () => {
     });
   };
 
+  const scoreboardSlots = useMemo(() => Array.from({ length: 4 }, (_, index) => players[index] || null), [players]);
+
   const renderExampleDice = (values: DieValue[], keyPrefix: string) => (
     <div className="flex justify-end flex-wrap gap-1 pointer-events-none">
       {values.map((value, index) => (
@@ -331,24 +333,33 @@ const App: React.FC = () => {
 
             <div className="flex-1 min-h-0 w-full">
               {infoTab === 'scoreboard' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3 items-start">
-                  {players.map((player) => {
-                    const isCurrentPlayer = gameState.currentPlayerTurn === player.id;
+                <div className="grid gap-2 md:gap-3 grid-cols-2 grid-rows-2 h-full items-stretch">
+                  {scoreboardSlots.map((player, index) => {
+                    const isCurrentPlayer = player ? gameState.currentPlayerTurn === player.id : false;
                     return (
                       <div
-                        key={player.id}
-                        className={`bg-stone-900/60 border-2 rounded-lg p-2 text-center transition-all flex flex-col items-center gap-1.5 ${isCurrentPlayer ? 'border-lime-500 shadow-lg shadow-lime-500/40' : 'border-amber-600/70'}`}
+                        key={player ? player.id : `empty-${index}`}
+                        className={`bg-stone-900/60 border-2 rounded-lg p-2 text-center transition-all flex flex-col items-center justify-center gap-1.5 h-full ${player && isCurrentPlayer ? 'border-lime-500 shadow-lg shadow-lime-500/40' : 'border-amber-600/40'}`}
                       >
-                        <div className={`bg-stone-800 border rounded-md p-1 transition-transform ${isCurrentPlayer ? 'border-lime-500 scale-105' : 'border-amber-600/80'}`}>
-                          <img
-                            src={`/images/farkle-avatar-${player.avatar}.png`}
-                            alt={`${player.nickname}'s avatar`}
-                            className="w-8 h-8 object-cover rounded"
-                          />
-                        </div>
-                        <p className="text-amber-200 text-xs font-semibold truncate w-full">{player.nickname}</p>
-                        <p className="text-xl font-bold text-white">{player.score}</p>
-                        {isCurrentPlayer && <p className="text-lime-400 text-[10px] uppercase tracking-wide">Playing</p>}
+                        {player ? (
+                          <>
+                            <div className={`bg-stone-800 border rounded-md p-1 transition-transform ${isCurrentPlayer ? 'border-lime-500 scale-105' : 'border-amber-600/80'}`}>
+                              <img
+                                src={`/images/farkle-avatar-${player.avatar}.png`}
+                                alt={`${player.nickname}'s avatar`}
+                                className="w-8 h-8 object-cover rounded"
+                              />
+                            </div>
+                            <p className="text-amber-200 text-xs font-semibold truncate w-full">{player.nickname}</p>
+                            <p className="text-xl font-bold text-white">{player.score}</p>
+                            {isCurrentPlayer && <p className="text-lime-400 text-[10px] uppercase tracking-wide">Playing</p>}
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-8 h-8 rounded bg-stone-800/60 border border-amber-600/40 flex items-center justify-center text-amber-300 text-xs font-semibold">Seat {index + 1}</div>
+                            <p className="text-stone-400 text-[10px] uppercase tracking-[0.2em]">Waiting</p>
+                          </>
+                        )}
                       </div>
                     );
                   })}
