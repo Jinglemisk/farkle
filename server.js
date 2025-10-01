@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
   console.log('Player connected:', socket.id);
 
   // Create or join lobby
-  socket.on('createOrJoinLobby', ({ nickname, lobbyCode }) => {
+  socket.on('createOrJoinLobby', ({ nickname, avatar, lobbyCode }) => {
     let code = lobbyCode?.toUpperCase();
     let isNewLobby = false;
 
@@ -88,6 +88,7 @@ io.on('connection', (socket) => {
     const player = {
       id: socket.id,
       nickname,
+      avatar,
       score: 0,
       isReady: false
     };

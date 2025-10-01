@@ -53,15 +53,24 @@ const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, o
                       <p className="text-stone-500 text-xs">Waiting...</p>
                     </div>
                   ) : (
-                    <div className="text-center w-full">
-                      <p className="text-amber-200 font-semibold text-lg truncate">
-                        {player.nickname}
-                      </p>
-                      {player.id === players[0]?.id && (
-                        <span className="inline-block bg-amber-600 text-stone-900 text-xs font-bold px-2 py-1 rounded mt-1">
-                          HOST
-                        </span>
-                      )}
+                    <div className="flex items-center gap-3 w-full">
+                      <div className="bg-stone-900 border-2 border-amber-600 rounded-lg p-1 flex-shrink-0">
+                        <img
+                          src={`/images/farkle-avatar-${player.avatar}.png`}
+                          alt={`${player.nickname}'s avatar`}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      </div>
+                      <div className="text-left flex-1 min-w-0">
+                        <p className="text-amber-200 font-semibold text-lg truncate">
+                          {player.nickname}
+                        </p>
+                        {player.id === players[0]?.id && (
+                          <span className="inline-block bg-amber-600 text-stone-900 text-xs font-bold px-2 py-1 rounded mt-1">
+                            HOST
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

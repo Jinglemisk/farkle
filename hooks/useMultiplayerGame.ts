@@ -93,11 +93,11 @@ export const useMultiplayerGame = () => {
     setError('');
   }, []);
 
-  const createOrJoinLobby = useCallback((nickname: string, code?: string) => {
+  const createOrJoinLobby = useCallback((nickname: string, avatar: number, code?: string) => {
     if (!socket) return;
 
     setCurrentPlayerNickname(nickname);
-    socket.emit('createOrJoinLobby', { nickname, lobbyCode: code });
+    socket.emit('createOrJoinLobby', { nickname, avatar, lobbyCode: code });
   }, [socket]);
 
   const startGame = useCallback(() => {

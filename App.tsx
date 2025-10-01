@@ -251,21 +251,33 @@ const App: React.FC = () => {
         <footer className="mt-8">
           {/* All Players Scores */}
           <div className="grid grid-cols-2 gap-4 mb-4">
-            {players.map((player) => (
-              <div
-                key={player.id}
-                className={`
-                  bg-stone-900/70 border-4 rounded-lg p-4 text-center
-                  ${gameState.currentPlayerTurn === player.id ? 'border-lime-500' : 'border-amber-600'}
-                `}
-              >
-                <p className="text-amber-200 text-sm font-semibold truncate">{player.nickname}</p>
-                <p className="text-3xl font-bold text-white">{player.score}</p>
-                {gameState.currentPlayerTurn === player.id && (
-                  <p className="text-lime-400 text-xs mt-1">PLAYING</p>
-                )}
-              </div>
-            ))}
+            {players.map((player) => {
+              const isCurrentPlayer = gameState.currentPlayerTurn === player.id;
+              return (
+                <div
+                  key={player.id}
+                  className={`
+                    bg-stone-900/70 border-4 rounded-lg p-4 text-center transition-all
+                    ${isCurrentPlayer ? 'border-lime-500 shadow-lg shadow-lime-500/50' : 'border-amber-600'}
+                  `}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <div className={`bg-stone-800 border-2 rounded-lg p-1 transition-transform ${isCurrentPlayer ? 'border-lime-500 scale-110' : 'border-amber-600'}`}>
+                      <img
+                        src={`/images/farkle-avatar-${player.avatar}.png`}
+                        alt={`${player.nickname}'s avatar`}
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                    </div>
+                    <p className="text-amber-200 text-sm font-semibold truncate w-full">{player.nickname}</p>
+                    <p className="text-3xl font-bold text-white">{player.score}</p>
+                    {isCurrentPlayer && (
+                      <p className="text-lime-400 text-xs mt-1">PLAYING</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Current Turn Info */}

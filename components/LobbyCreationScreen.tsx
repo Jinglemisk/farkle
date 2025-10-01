@@ -1,19 +1,30 @@
 import React, { useState } from 'react';
 
 interface LobbyCreationScreenProps {
-  onCreateOrJoin: (nickname: string, lobbyCode?: string) => void;
+  onCreateOrJoin: (nickname: string, avatar: number, lobbyCode?: string) => void;
   error?: string;
 }
 
 const LobbyCreationScreen: React.FC<LobbyCreationScreenProps> = ({ onCreateOrJoin, error }) => {
   const [nickname, setNickname] = useState('');
   const [lobbyCode, setLobbyCode] = useState('');
+  const [selectedAvatar, setSelectedAvatar] = useState(1);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (nickname.trim()) {
-      onCreateOrJoin(nickname.trim(), lobbyCode.trim() || undefined);
+      onCreateOrJoin(nickname.trim(), selectedAvatar, lobbyCode.trim() || undefined);
     }
+  };
+
+  const cycleAvatar = (direction: 'left' | 'right') => {
+    setSelectedAvatar(prev => {
+      if (direction === 'left') {
+        return prev === 1 ? 6 : prev - 1;
+      } else {
+        return prev === 6 ? 1 : prev + 1;
+      }
+    });
   };
 
   return (
@@ -39,6 +50,35 @@ const LobbyCreationScreen: React.FC<LobbyCreationScreenProps> = ({ onCreateOrJoi
               className="w-full px-4 py-3 bg-stone-700 border-2 border-amber-600 rounded-lg text-amber-100 placeholder-stone-400 focus:outline-none focus:border-amber-400 transition-colors"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-amber-200 text-sm font-semibold mb-2">
+              Choose Your Avatar
+            </label>
+            <div className="flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => cycleAvatar('left')}
+                className="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold w-10 h-10 rounded-lg shadow-md transition-transform transform hover:scale-110"
+              >
+                ←
+              </button>
+              <div className="bg-stone-700 border-4 border-amber-600 rounded-lg p-2">
+                <img
+                  src={`/images/farkle-avatar-${selectedAvatar}.png`}
+                  alt={`Avatar ${selectedAvatar}`}
+                  className="w-20 h-20 object-cover rounded-lg"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => cycleAvatar('right')}
+                className="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold w-10 h-10 rounded-lg shadow-md transition-transform transform hover:scale-110"
+              >
+                →
+              </button>
+            </div>
           </div>
 
           <div>

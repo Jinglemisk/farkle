@@ -19,6 +19,7 @@ export enum GameStatus {
 export interface Player {
   id: string;
   nickname: string;
+  avatar: number;
   score: number;
   isReady: boolean;
 }
