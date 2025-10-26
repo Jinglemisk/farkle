@@ -6,6 +6,7 @@ import Die from './components/Die';
 import Modal from './components/Modal';
 import LobbyCreationScreen from './components/LobbyCreationScreen';
 import LobbyScreen from './components/LobbyScreen';
+import SoundToggle from './components/SoundToggle';
 import { GameStatus, Screen, DieValue } from './types';
 import { GAME_MODES } from './constants';
 import { calculateScore, isScoringDie, checkForFarkle } from './utils/scoring';
@@ -31,7 +32,7 @@ const App: React.FC = () => {
     winner,
   } = useMultiplayerGame();
 
-  const { playMusic, startTavernMusic, stopAllMusic, playSoundEffect } = useAudioManager();
+  const { playMusic, startTavernMusic, stopAllMusic, playSoundEffect, soundEnabled, toggleSound } = useAudioManager();
 
   // Always call hooks - compute game values even if not on game screen
   const dice = gameState?.dice || [];
@@ -100,7 +101,14 @@ const App: React.FC = () => {
 
   // Render lobby creation screen
   if (screen === Screen.LobbyCreation) {
-    return <LobbyCreationScreen onCreateOrJoin={createOrJoinLobby} error={error} />;
+    return (
+      <LobbyCreationScreen 
+        onCreateOrJoin={createOrJoinLobby} 
+        error={error}
+        soundEnabled={soundEnabled}
+        toggleSound={toggleSound}
+      />
+    );
   }
 
   // Render lobby screen
@@ -111,6 +119,8 @@ const App: React.FC = () => {
         players={players}
         isHost={isHost}
         onStartGame={startGame}
+        soundEnabled={soundEnabled}
+        toggleSound={toggleSound}
       />
     );
   }
@@ -218,7 +228,10 @@ const App: React.FC = () => {
 
       <div className="w-full max-w-6xl mx-auto bg-stone-800/60 backdrop-blur-sm shadow-2xl rounded-xl border-4 border-amber-800 p-4 sm:p-6 lg:p-7 lg:h-[88vh] lg:overflow-hidden">
         <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:grid-rows-[auto_minmax(0,1fr)] lg:gap-x-6 lg:gap-y-6 lg:h-full">
-          <header className="text-center lg:text-left lg:col-start-1 lg:row-start-1">
+          <header className="text-center lg:text-left lg:col-start-1 lg:row-start-1 relative">
+            <div className="absolute top-0 right-0">
+              <SoundToggle soundEnabled={soundEnabled} toggleSound={toggleSound} />
+            </div>
             <h1 className="text-4xl font-bold text-amber-300 tracking-[0.35em]">FARKLE</h1>
             <p className="text-amber-200 text-sm sm:text-base">{GAME_MODES[gameMode].label} Mode - Score {GAME_MODES[gameMode].winningScore} points to win!</p>
             {currentPlayer && (

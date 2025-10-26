@@ -1,9 +1,15 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 type MusicTrack = 'lobby' | 'tavern1' | 'tavern2' | 'ending';
 type SoundEffect = 'diceroll' | 'farkled';
 
 export const useAudioManager = () => {
+  // Sound enabled state - persisted in localStorage
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
+    const saved = localStorage.getItem('farkle-sound-enabled');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
   // Music refs
   const lobbyMusicRef = useRef<HTMLAudioElement | null>(null);
   const tavern1MusicRef = useRef<HTMLAudioElement | null>(null);
@@ -52,6 +58,11 @@ export const useAudioManager = () => {
     };
   }, []);
 
+  // Save sound preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('farkle-sound-enabled', JSON.stringify(soundEnabled));
+  }, [soundEnabled]);
+
   // Stop all music
   const stopAllMusic = useCallback(() => {
     if (lobbyMusicRef.current) {
@@ -74,8 +85,22 @@ export const useAudioManager = () => {
     isTavernCyclingRef.current = false;
   }, []);
 
+  // Toggle sound function
+  const toggleSound = useCallback(() => {
+    setSoundEnabled(prev => {
+      const newValue = !prev;
+      if (!newValue) {
+        stopAllMusic();
+      }
+      return newValue;
+    });
+  }, [stopAllMusic]);
+
   // Play music
   const playMusic = useCallback((track: MusicTrack) => {
+    // Don't play if sound is disabled
+    if (!soundEnabled) return;
+
     // Don't restart if already playing this track
     if (track === 'lobby' && currentMusicRef.current === lobbyMusicRef.current && !lobbyMusicRef.current?.paused) {
       return;
@@ -107,10 +132,13 @@ export const useAudioManager = () => {
       });
       currentMusicRef.current = audioElement;
     }
-  }, [stopAllMusic]);
+  }, [soundEnabled, stopAllMusic]);
 
   // Start tavern music cycling
   const startTavernMusic = useCallback(() => {
+    // Don't play if sound is disabled
+    if (!soundEnabled) return;
+    
     if (isTavernCyclingRef.current) return;
 
     isTavernCyclingRef.current = true;
@@ -140,10 +168,13 @@ export const useAudioManager = () => {
       currentMusicRef.current = firstTrack;
       cycleMusic(firstTrack, secondTrack);
     }
-  }, [stopAllMusic]);
+  }, [soundEnabled, stopAllMusic]);
 
   // Play sound effect
   const playSoundEffect = useCallback((sfx: SoundEffect) => {
+    // Don't play if sound is disabled
+    if (!soundEnabled) return;
+    
     let audioElement: HTMLAudioElement | null = null;
 
     switch (sfx) {
@@ -161,12 +192,14 @@ export const useAudioManager = () => {
         console.warn('Sound effect playback failed:', err);
       });
     }
-  }, []);
+  }, [soundEnabled]);
 
   return {
     playMusic,
     startTavernMusic,
     stopAllMusic,
     playSoundEffect,
+    soundEnabled,
+    toggleSound,
   };
 };

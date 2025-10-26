@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import SoundToggle from './SoundToggle';
 
 interface LobbyCreationScreenProps {
   onCreateOrJoin: (nickname: string, avatar: number, lobbyCode?: string) => void;
   error?: string;
+  soundEnabled: boolean;
+  toggleSound: () => void;
 }
 
-const LobbyCreationScreen: React.FC<LobbyCreationScreenProps> = ({ onCreateOrJoin, error }) => {
+const LobbyCreationScreen: React.FC<LobbyCreationScreenProps> = ({ onCreateOrJoin, error, soundEnabled, toggleSound }) => {
   const [nickname, setNickname] = useState('');
   const [lobbyCode, setLobbyCode] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(1);
@@ -30,7 +33,10 @@ const LobbyCreationScreen: React.FC<LobbyCreationScreenProps> = ({ onCreateOrJoi
   return (
     <div className="min-h-screen bg-stone-900 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] flex items-center justify-center px-3 py-4 lg:px-6 lg:py-6 overflow-y-auto lg:overflow-hidden">
       <div className="w-full max-w-5xl mx-auto bg-stone-800/60 backdrop-blur-sm shadow-2xl rounded-xl border-4 border-amber-800 p-4 sm:p-6 lg:p-7 lg:h-[86vh] flex flex-col gap-6 lg:overflow-hidden">
-        <header className="text-center lg:text-left">
+        <header className="text-center lg:text-left relative">
+          <div className="absolute top-0 right-0">
+            <SoundToggle soundEnabled={soundEnabled} toggleSound={toggleSound} />
+          </div>
           <h1 className="text-4xl font-bold text-amber-300 tracking-[0.35em] mb-1">FARKLE</h1>
           <p className="text-amber-200 text-sm sm:text-base">Multiplayer Dice Game</p>
         </header>
