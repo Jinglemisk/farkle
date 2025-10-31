@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
 import { Player, GameMode } from '../types';
 import { GAME_MODES } from '../constants';
+import SoundToggle from './SoundToggle';
 
 interface LobbyScreenProps {
   lobbyCode: string;
   players: Player[];
   isHost: boolean;
   onStartGame: (gameMode: GameMode) => void;
+  soundEnabled: boolean;
+  toggleSound: () => void;
 }
 
-const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, onStartGame }) => {
+const LobbyScreen: React.FC<LobbyScreenProps> = ({ lobbyCode, players, isHost, onStartGame, soundEnabled, toggleSound }) => {
   const [gameMode, setGameMode] = useState<GameMode>('standard');
   const canStart = players.length >= 2 && isHost;
 
   return (
     <div className="min-h-screen bg-stone-900 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] flex items-center justify-center px-3 py-4 lg:px-6 lg:py-6 overflow-y-auto lg:overflow-hidden">
       <div className="w-full max-w-5xl mx-auto bg-stone-800/60 backdrop-blur-sm shadow-2xl rounded-xl border-4 border-amber-800 p-4 sm:p-6 lg:p-7 lg:h-[88vh] flex flex-col gap-6 lg:overflow-hidden">
-        <header className="text-center lg:text-left">
+        <header className="text-center lg:text-left relative">
+          <div className="absolute top-0 right-0">
+            <SoundToggle soundEnabled={soundEnabled} toggleSound={toggleSound} />
+          </div>
           <h1 className="text-4xl font-bold text-amber-300 tracking-[0.35em] mb-1">FARKLE</h1>
           <p className="text-amber-200 text-sm sm:text-base">Game Lobby</p>
         </header>
