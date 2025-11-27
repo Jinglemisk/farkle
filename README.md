@@ -1,6 +1,6 @@
-# Farkle - Multiplayer Dice Game
+# Farkle - Dice Game
 
-A real-time multiplayer dice game built with React, TypeScript, Socket.io, and Express. Farkle is a classic dice game where players roll dice, score points based on combinations, and compete to reach the winning score first.
+A real-time multiplayer and singleplayer dice game built with React, TypeScript, Socket.io, and Express. Farkle is a classic dice game where players roll dice, score points based on combinations, and compete to reach the winning score first.
 
 ## What is Farkle?
 
@@ -8,17 +8,29 @@ Farkle is a fun, fast-paced dice game where players take turns rolling six dice 
 
 ## Game Features
 
-### Multiplayer Mode (Default)
-The game is built for **multiplayer by default**, supporting 2-4 players in real-time competitive matches:
+Play **Solo** or **Multiplayer** - choose your mode right from the lobby creation screen!
+
+### Singleplayer Mode
+Perfect your strategy and practice solo:
+- Select from three game modes: Rush (1000 pts), Standard (2000 pts), Marathon (4000 pts)
+- Track your personal best scores
+- Same core gameplay mechanics as multiplayer
+- Full audio experience with tavern music and sound effects
+- Avatar selection and customization
+
+### Multiplayer Mode
+Compete with 2-4 players in real-time matches:
 - Create or join lobbies with 6-letter codes
 - Real-time gameplay with WebSocket communication
-- Multiple game modes: Rush (1000 pts), Standard (2000 pts), Marathon (4000 pts)
+- Host selects game mode for the entire lobby
 - Live scoreboard and turn tracking
 - Immersive audio with tavern music and sound effects
 - Avatar selection and player customization
 
-### Single Player Mode (Available via useFarkleGame.ts)
-While multiplayer is the default experience, the game includes a single-player hook (`hooks/useFarkleGame.ts`) for solo gameplay. The multiplayer version uses `hooks/useMultiplayerGame.ts` as the default game hook.
+### Unified Experience
+- **Mode Toggle**: Switch between Solo and Multiplayer modes from the lobby creation screen
+- **Seamless Transition**: No code changes needed - just select your preferred mode
+- **Consistent UI**: Same polished interface across both modes
 
 ## Game Rules
 
@@ -43,29 +55,53 @@ Players take turns rolling 6 dice and scoring points:
 ### Frontend
 - **React 19** with TypeScript
 - **Vite** for fast development and building
-- **Socket.io Client** for real-time communication
+- **Socket.io Client** for real-time multiplayer communication
+- **Mode Routing**: App component switches between `MultiplayerApp` and `SingleplayerApp` based on user selection
 - Custom hooks for game logic and audio management
 
 ### Backend
 - **Express 5** server
-- **Socket.io** for WebSocket connections
+- **Socket.io** for WebSocket connections (multiplayer only)
 - **In-memory database** using JavaScript Map objects (see Database section below)
+
+### Key Components
+
+#### App.tsx
+Main application component that:
+- Manages play mode state (singleplayer vs multiplayer)
+- Routes to `MultiplayerApp` or `SingleplayerApp` components
+- Preserves player info when switching modes
+
+#### MultiplayerApp
+Handles all multiplayer game flow:
+- Uses `useMultiplayerGame` hook for Socket.io-based gameplay
+- Manages lobby creation/joining screens
+- Real-time game state synchronization
+- Multiplayer scoreboard and turn management
+
+#### SingleplayerApp
+Handles all singleplayer game flow:
+- Uses `useFarkleGame` hook for local gameplay
+- Game mode selection screen
+- Local game state management
+- Single player scoreboard
 
 ### Key Hooks
 
-#### useMultiplayerGame.ts (Default)
-The primary game hook for multiplayer functionality. Handles:
+#### useMultiplayerGame.ts
+The multiplayer game hook. Handles:
 - Socket.io connection management
 - Lobby creation and joining
 - Real-time game state synchronization
 - Player actions (roll, select, keep, bank)
 - Turn management and winner detection
 
-#### useFarkleGame.ts (Single Player)
-Alternative hook for single-player gameplay. Handles:
+#### useFarkleGame.ts
+The singleplayer game hook. Handles:
 - Local game state management
 - Dice rolling and scoring logic
 - Turn management for solo play
+- Dynamic winning scores based on game mode
 - Game status tracking (not started, player turn, farkled, won)
 
 #### useAudioManager.ts
@@ -149,12 +185,14 @@ The server performs these key operations:
 npm install
 ```
 
-### 2. Start the Backend Server
+### 2. Start the Backend Server (Required for Multiplayer Only)
 In one terminal:
 ```bash
 npm run server
 ```
 This starts the Socket.io server on port 3001 (or PORT environment variable).
+
+**Note:** Skip this step if you only want to play singleplayer mode.
 
 ### 3. Start the Frontend
 In another terminal:
@@ -165,20 +203,30 @@ This starts the Vite dev server on port 5173.
 
 ### 4. Play the Game
 
-**Creating a Lobby:**
+**Singleplayer:**
 1. Open http://localhost:5173
 2. Enter your nickname and select an avatar
-3. Leave the lobby code empty
-4. Click "Create Lobby"
-5. Share the 6-letter code with friends
+3. Toggle to **Solo** mode
+4. Click "Play Solo"
+5. Select your game mode: Rush (1000), Standard (2000), or Marathon (4000)
+6. Click "Start Game" and play!
 
-**Joining a Lobby:**
+**Multiplayer - Creating a Lobby:**
+1. Open http://localhost:5173
+2. Enter your nickname and select an avatar
+3. Toggle to **Multiplayer** mode (default)
+4. Leave the lobby code empty
+5. Click "Create Lobby"
+6. Share the 6-letter code with friends
+
+**Multiplayer - Joining a Lobby:**
 1. Open http://localhost:5173 in a new tab/window
 2. Enter your nickname and select an avatar
-3. Enter the 6-letter lobby code
-4. Click "Join Lobby"
+3. Toggle to **Multiplayer** mode (default)
+4. Enter the 6-letter lobby code
+5. Click "Join Lobby"
 
-**Starting the Game:**
+**Multiplayer - Starting the Game:**
 - Wait for at least 2 players (up to 4 players)
 - Host selects a game mode: Rush (1000), Standard (2000), or Marathon (4000)
 - Host clicks "Start Game"
@@ -202,6 +250,13 @@ The production build will be in the `dist/` folder.
 
 ## Important Notes
 
+### Singleplayer
+- **No Server Required**: Singleplayer mode works entirely client-side (no backend needed)
+- **No Persistence**: Refreshing the page resets your game
+- **Offline Play**: Can be played without internet connection (after initial load)
+
+### Multiplayer
+- **Server Required**: Backend server must be running for multiplayer
 - **No Persistence**: Refreshing the page disconnects you from the game
 - **Host Disconnect**: If the host leaves, all players are kicked out
 - **Trusted Environment**: No anti-cheat or validation measures
@@ -221,19 +276,20 @@ The production build will be in the `dist/` folder.
 farkle/
 ├── components/          # React components
 │   ├── Die.tsx         # Dice rendering component
-│   ├── LobbyCreationScreen.tsx
-│   ├── LobbyScreen.tsx
+│   ├── LobbyCreationScreen.tsx  # Unified lobby creation (mode toggle)
+│   ├── LobbyScreen.tsx          # Multiplayer lobby screen
+│   ├── SingleplayerLobbyScreen.tsx  # Singleplayer game mode selection
 │   ├── Modal.tsx
 │   └── SoundToggle.tsx
 ├── hooks/              # Custom React hooks
-│   ├── useMultiplayerGame.ts  # Default multiplayer hook
-│   ├── useFarkleGame.ts       # Single-player hook
+│   ├── useMultiplayerGame.ts  # Multiplayer game logic
+│   ├── useFarkleGame.ts       # Singleplayer game logic
 │   └── useAudioManager.ts     # Audio management
 ├── utils/              # Utility functions
 │   └── scoring.ts      # Dice scoring logic
 ├── types.ts            # TypeScript type definitions
 ├── constants.ts        # Game constants and modes
-├── App.tsx            # Main game component
+├── App.tsx            # Main app with mode routing
 ├── server.js          # Express + Socket.io server
 └── dist/              # Production build output
     ├── audio/         # Game sound effects and music
