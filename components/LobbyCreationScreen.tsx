@@ -48,52 +48,54 @@ const LobbyCreationScreen: React.FC<LobbyCreationScreenProps> = ({ onCreateOrJoi
         </header>
 
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-6 flex-1 min-h-0">
-          <form onSubmit={handleSubmit} className="bg-stone-900/70 border-4 border-amber-700 rounded-lg p-4 sm:p-5 flex flex-col gap-4 min-h-0">
-            <div className="grid gap-4">
-              <div>
-                <label htmlFor="nickname" className="block text-amber-200 text-xs sm:text-sm font-semibold mb-2">
-                  Your Nickname
-                </label>
-                <input
-                  type="text"
-                  id="nickname"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  maxLength={20}
-                  placeholder="Enter your nickname"
-                  className="w-full px-4 py-2.5 bg-stone-700 border-2 border-amber-600 rounded-lg text-amber-100 placeholder-stone-400 focus:outline-none focus:border-amber-400 transition-colors"
-                  required
-                />
-              </div>
+          <form onSubmit={handleSubmit} className="bg-stone-900/70 border-4 border-amber-700 rounded-lg p-4 sm:p-5 flex flex-col gap-3">
+            <div className="grid gap-3">
+              <div className="flex gap-3 items-start">
+                <div className="flex-1">
+                  <label htmlFor="nickname" className="block text-amber-200 text-xs sm:text-sm font-semibold mb-2">
+                    Your Nickname
+                  </label>
+                  <input
+                    type="text"
+                    id="nickname"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    maxLength={20}
+                    placeholder="Enter your nickname"
+                    className="w-full px-4 py-2.5 bg-stone-700 border-2 border-amber-600 rounded-lg text-amber-100 placeholder-stone-400 focus:outline-none focus:border-amber-400 transition-colors h-[46px]"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-amber-200 text-xs sm:text-sm font-semibold mb-2">
-                  Choose Your Avatar
-                </label>
-                <div className="flex items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => cycleAvatar('left')}
-                    className="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold w-9 h-9 rounded-lg shadow-md transition-transform transform hover:scale-110"
-                    aria-label="Previous avatar"
-                  >
-                    ←
-                  </button>
-                  <div className="bg-stone-700 border-4 border-amber-600 rounded-lg p-2">
-                    <img
-                      src={`/images/farkle-avatar-${selectedAvatar}.png`}
-                      alt={`Avatar ${selectedAvatar}`}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
+                <div className="flex-shrink-0">
+                  <label className="block text-amber-200 text-xs sm:text-sm font-semibold mb-2 text-center">
+                    Avatar
+                  </label>
+                  <div className="flex items-center gap-2 h-[46px]">
+                    <button
+                      type="button"
+                      onClick={() => cycleAvatar('left')}
+                      className="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold w-9 h-9 rounded-lg shadow-md transition-transform transform hover:scale-110 flex-shrink-0"
+                      aria-label="Previous avatar"
+                    >
+                      ←
+                    </button>
+                    <div className="bg-stone-700 border-2 border-amber-600 rounded-lg p-1 flex-shrink-0">
+                      <img
+                        src={`/images/farkle-avatar-${selectedAvatar}.png`}
+                        alt={`Avatar ${selectedAvatar}`}
+                        className="w-10 h-10 object-cover rounded"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => cycleAvatar('right')}
+                      className="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold w-9 h-9 rounded-lg shadow-md transition-transform transform hover:scale-110 flex-shrink-0"
+                      aria-label="Next avatar"
+                    >
+                      →
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => cycleAvatar('right')}
-                    className="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold w-9 h-9 rounded-lg shadow-md transition-transform transform hover:scale-110"
-                    aria-label="Next avatar"
-                  >
-                    →
-                  </button>
                 </div>
               </div>
 
