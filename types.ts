@@ -17,6 +17,8 @@ export enum GameStatus {
 
 export type GameMode = 'rush' | 'standard' | 'marathon';
 
+export type PlayMode = 'singleplayer' | 'multiplayer';
+
 // Multiplayer types
 export interface Player {
   id: string;
