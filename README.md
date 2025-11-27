@@ -1,7 +1,3 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 # Farkle - Multiplayer Dice Game
 
 A real-time multiplayer dice game built with React, TypeScript, Socket.io, and Express. Farkle is a classic dice game where players roll dice, score points based on combinations, and compete to reach the winning score first.
@@ -78,6 +74,9 @@ Manages all game audio including:
 - Lobby music
 - Sound effects (dice roll, farkle, ending)
 - Sound toggle functionality
+
+## Soundtrack
+I took the liberty of taking two soundtracks from the hit RPG Kingdom Come: Deliverance as I found out about Farkle thanks to KCD and the music is befitting. There is also an SFX from Age of Empires II. Needless to say, any commercial use of this repo would have to replace the music here.
 
 ## Database Structure
 
