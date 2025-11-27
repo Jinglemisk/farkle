@@ -16,10 +16,11 @@ interface UseFarkleGameProps {
     onDiceRoll?: () => void;
     onFarkle?: () => void;
     onWin?: () => void;
+    winningScore?: number;
 }
 
 export const useFarkleGame = (props?: UseFarkleGameProps) => {
-    const { onDiceRoll, onFarkle, onWin } = props || {};
+    const { onDiceRoll, onFarkle, onWin, winningScore = WINNING_SCORE } = props || {};
     const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.NotStarted);
     const [dice, setDice] = useState<Die[]>(createInitialDice());
     const [keptDice, setKeptDice] = useState<Die[]>([]);
@@ -64,12 +65,12 @@ export const useFarkleGame = (props?: UseFarkleGameProps) => {
     }, [dice, keptDice.length, onDiceRoll, onFarkle]);
     
     const handleFarkleAck = useCallback(() => {
-        if (totalScore >= WINNING_SCORE) {
+        if (totalScore >= winningScore) {
             setGameStatus(GameStatus.GameOverWin);
         } else {
             startTurn();
         }
-    }, [startTurn, totalScore]);
+    }, [startTurn, totalScore, winningScore]);
 
 
     const handleSelectDie = useCallback((id: number) => {
@@ -118,13 +119,13 @@ export const useFarkleGame = (props?: UseFarkleGameProps) => {
 
         const newTotalScore = totalScore + finalTurnScore;
         setTotalScore(newTotalScore);
-        if (newTotalScore >= WINNING_SCORE) {
+        if (newTotalScore >= winningScore) {
             setGameStatus(GameStatus.GameOverWin);
             onWin?.();
         } else {
             startTurn();
         }
-    }, [totalScore, turnScore, startTurn, gameStatus, dice, onWin]);
+    }, [totalScore, turnScore, startTurn, gameStatus, dice, onWin, winningScore]);
     
     const modalAction = gameStatus === GameStatus.GameOverFarkle ? handleFarkleAck : handleNewGame;
 
